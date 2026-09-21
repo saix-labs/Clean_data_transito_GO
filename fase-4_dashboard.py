@@ -68,10 +68,6 @@ elif pagina == "Ato 3: Análise Temporal e Solução":
 
 
 
-import streamlit as st
-import pandas as pd
-import plotly.express as px
-
 # 1. Configuração da página e layout
 st.set_page_config(page_title="Painel de Acidentes - GO", layout="wide")
 
@@ -132,7 +128,13 @@ with col1:
         color_discrete_sequence=px.colors.sequential.Blues_r
     )
     fig_turno.update_traces(textinfo='percent+label')
-    fig_turno.update_layout(showlegend=False, margin=dict(t=20, b=20, l=10, r=10))
+    fig_turno.update_layout(
+        showlegend=False, 
+        margin=dict(t=20, b=20, l=10, r=10),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='white')
+    )
     st.plotly_chart(fig_turno, use_container_width=True)
 
 with col2:
@@ -150,7 +152,14 @@ with col2:
         color='Total',
         color_continuous_scale='Blues'
     )
-    fig_br.update_layout(yaxis={'categoryorder':'total ascending'}, showlegend=False, coloraxis_showscale=False)
+    fig_br.update_layout(
+        yaxis={'categoryorder':'total ascending'}, 
+        showlegend=False, 
+        coloraxis_showscale=False,
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='white')
+    )
     st.plotly_chart(fig_br, use_container_width=True)
 
 # --- LINHA 2: TIPO DE PISTA E CONDIÇÃO METEOROLÓGICA ---
@@ -168,6 +177,11 @@ with col3:
         text='Total',
         color_discrete_sequence=['#1f77b4']
     )
+    fig_pista.update_layout(
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='white')
+    )
     st.plotly_chart(fig_pista, use_container_width=True)
 
 with col4:
@@ -181,6 +195,11 @@ with col4:
         y='Total', 
         text='Total',
         color_discrete_sequence=['#2b5c8f']
+    )
+    fig_clima.update_layout(
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='white')
     )
     st.plotly_chart(fig_clima, use_container_width=True)
 
