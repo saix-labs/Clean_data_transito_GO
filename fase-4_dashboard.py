@@ -1,10 +1,15 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
-from estilos import aplicar_estilos  # Importa a estilização do arquivo estilos.py
+from estilos import aplicar_estilos
+from graficos import (
+    criar_fig_turno, 
+    criar_fig_br, 
+    criar_fig_pista, 
+    criar_fig_clima, 
+    criar_fig_mapa
+)
 
-# 1. Configuração inicial da página (Apenas UMA vez no topo do arquivo)
+# 1. Configuração inicial da página
 st.set_page_config(
     page_title="Dashboard - Segurança Viária GO",
     layout="wide",
@@ -73,119 +78,28 @@ if pagina == "Ato 1: Panorama Geral":
 
     with col1:
         st.subheader("Distribuição por Turno (Fase do Dia)")
-        df_turno = df['fase_dia'].value_counts().reset_index()
-        df_turno.columns = ['Fase do Dia', 'Total']
-        
-        fig_turno = px.pie(
-            df_turno, 
-            values='Total', 
-            names='Fase do Dia', 
-            hole=0.5,
-            color_discrete_sequence=px.colors.sequential.Blues_r
-        )
-        fig_turno.update_traces(textinfo='percent+label')
-        fig_turno.update_layout(
-            showlegend=False, 
-            margin=dict(t=20, b=20, l=10, r=10),
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='white')
-        )
-        st.plotly_chart(fig_turno, use_container_width=True)
+        st.plotly_chart(criar_fig_turno(df), use_container_width=True)
 
     with col2:
         st.subheader("Ranking de BRs com Mais Ocorrências")
-        df_br = df['br'].value_counts().head(5).reset_index()
-        df_br.columns = ['BR', 'Total']
-        df_br['BR'] = "BR-" + df_br['BR'].astype(str)
-        
-        fig_br = px.bar(
-            df_br, 
-            x='Total', 
-            y='BR', 
-            orientation='h',
-            text='Total',
-            color='Total',
-            color_continuous_scale='Blues'
-        )
-        fig_br.update_layout(
-            yaxis={'categoryorder':'total ascending'}, 
-            showlegend=False, 
-            coloraxis_showscale=False,
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='white')
-        )
-        st.plotly_chart(fig_br, use_container_width=True)
+        st.plotly_chart(criar_fig_br(df), use_container_width=True)
 
     # --- LINHA 2: TIPO DE PISTA E CONDIÇÃO METEOROLÓGICA ---
     col3, col4 = st.columns(2)
 
     with col3:
         st.subheader("Infraestrutura: Tipo de Pista")
-        df_pista = df['tipo_pista'].value_counts().reset_index()
-        df_pista.columns = ['Tipo de Pista', 'Total']
-        
-        fig_pista = px.bar(
-            df_pista, 
-            x='Tipo de Pista', 
-            y='Total', 
-            text='Total',
-            color_discrete_sequence=['#1f77b4']
-        )
-        fig_pista.update_layout(
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='white')
-        )
-        st.plotly_chart(fig_pista, use_container_width=True)
+        st.plotly_chart(criar_fig_pista(df), use_container_width=True)
 
     with col4:
         st.subheader("Clima: Condição Meteorológica")
-        df_clima = df['condicao_metereologica'].value_counts().head(5).reset_index()
-        df_clima.columns = ['Condição', 'Total']
-        
-        fig_clima = px.bar(
-            df_clima, 
-            x='Condição', 
-            y='Total', 
-            text='Total',
-            color_discrete_sequence=['#2b5c8f']
-        )
-        fig_clima.update_layout(
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='white')
-        )
-        st.plotly_chart(fig_clima, use_container_width=True)
+        st.plotly_chart(criar_fig_clima(df), use_container_width=True)
 
     # --- MAPA DE CALOR POR MUNICÍPIO E TOP 5 CIDADES ---
     st.markdown("---")
     st.subheader("Distribuição do Volume de Acidentes por Município")
 
-    df_municipio = df['municipio'].value_counts().reset_index()
-    df_municipio.columns = ['Município', 'Total de Acidentes']
-
-    df_coords = df.groupby('municipio')[['latitude', 'longitude']].mean().reset_index()
-    df_coords.columns = ['Município', 'latitude', 'longitude']
-
-    df_mapa_cidades = pd.merge(df_municipio, df_coords, on='Município')
-
-    fig_mapa = px.scatter_mapbox(
-        df_mapa_cidades, 
-        lat='latitude', 
-        lon='longitude', 
-        size='Total de Acidentes',
-        color='Total de Acidentes',
-        color_continuous_scale='Reds',
-        hover_name='Município',
-        hover_data={'latitude': False, 'longitude': False, 'Total de Acidentes': True},
-        zoom=5.5,
-        center=dict(lat=-16.6869, lon=-49.2648),
-        mapbox_style="open-street-map"
-    )
-
-    fig_mapa.update_layout(margin=dict(t=0, b=0, l=0, r=0))
+    fig_mapa, df_municipio = criar_fig_mapa(df)
     st.plotly_chart(fig_mapa, use_container_width=True)
 
     st.markdown("### 🏆 Top 5 Municípios com Maior Registro de Acidentes")
