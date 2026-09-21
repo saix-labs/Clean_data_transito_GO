@@ -33,6 +33,20 @@ st.markdown("""
     h1, h2, h3 {
         color: #ffffff !important;
     }
+
+    /* === ESTILIZAÇÃO AZUL NEON PARA CARDS E MÉTRICAS === */
+    /* Rótulos (Texto/Palavras do Top 5 e Cards de Metricas) */
+    [data-testid="stMetricLabel"] {
+        color: #00f3ff !important;
+        font-weight: bold !important;
+        text-shadow: 0 0 8px rgba(0, 243, 255, 0.4);
+    }
+    
+    /* Valores numéricos das métricas */
+    [data-testid="stMetricValue"] {
+        color: #ffffff !important;
+        text-shadow: 0 0 10px rgba(0, 243, 255, 0.6);
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -52,6 +66,7 @@ with st.sidebar:
     
     st.markdown("---")
     st.caption("Análise de Sinistros de Trânsito - PRF / GO")
+    
 
 # 4. Área de Conteúdo Central
 if pagina == "Ato 1: Panorama Geral":
