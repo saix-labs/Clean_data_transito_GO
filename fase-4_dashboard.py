@@ -74,27 +74,33 @@ if pagina == "Ato 1: Panorama Geral":
     st.markdown("---")
 
     # --- LINHA 1: TURNO E RANKING DE BRS ---
-    col1, col2 = st.columns(2)
+    with st.container():
+        col1, col2 = st.columns(2)
 
-    with col1:
-        st.subheader("Distribuição por Turno (Fase do Dia)")
-        st.plotly_chart(criar_fig_turno(df), use_container_width=True)
+        with col1:
+            st.subheader("Distribuição por Turno (Fase do Dia)")
+            st.plotly_chart(criar_fig_turno(df), use_container_width=True)
 
-    with col2:
-        st.subheader("Ranking de BRs com Mais Ocorrências")
-        st.plotly_chart(criar_fig_br(df), use_container_width=True)
+        with col2:
+            st.subheader("Ranking de BRs com Mais Ocorrências")
+            st.plotly_chart(criar_fig_br(df), use_container_width=True)
+
+    # --- ESPAÇADOR DE TELA (Garante o isolamento da Linha 1 no F11) ---
+    st.markdown("<div style='margin-bottom: 35vh;'></div>", unsafe_allow_html=True)
 
     # --- LINHA 2: TIPO DE PISTA E CONDIÇÃO METEOROLÓGICA ---
-    col3, col4 = st.columns(2)
+    with st.container():
+        col3, col4 = st.columns(2)
 
-    with col3:
-        st.subheader("Infraestrutura: Tipo de Pista")
-        st.plotly_chart(criar_fig_pista(df), use_container_width=True)
+        with col3:
+            st.subheader("Infraestrutura: Tipo de Pista")
+            st.plotly_chart(criar_fig_pista(df), use_container_width=True)
 
-    with col4:
-        st.subheader("Clima: Condição Meteorológica")
-        st.plotly_chart(criar_fig_clima(df), use_container_width=True)
+        with col4:
+            st.subheader("Clima: Condição Meteorológica")
+            st.plotly_chart(criar_fig_clima(df), use_container_width=True)
 
+            
     # --- MAPA DE CALOR POR MUNICÍPIO E TOP 5 CIDADES ---
     st.markdown("---")
     st.subheader("Distribuição do Volume de Acidentes por Município")
