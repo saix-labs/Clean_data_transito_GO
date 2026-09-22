@@ -237,6 +237,24 @@ def criar_kpis_ato2(df):
     qtd_dias_uteis = df['dia_semana'].astype(str).str.lower().isin(dias_uteis).sum()
     pct_dias_uteis = (qtd_dias_uteis / total) * 100
 
+    # CSS isolado apenas para o VALOR do Card 3
+    st.markdown(
+        """
+        <style>
+            div[data-testid="stColumn"]:nth-child(3) [data-testid="stMetricValue"] {
+                font-size: 1.05rem !important;
+                line-height: 1.2 !important;
+                white-space: normal !important;
+                word-break: break-word !important;
+                min-height: 2.4rem !important;
+                display: flex !important;
+                align-items: center !important;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
     # Renderização visual dos 4 cards de KPI
     col1, col2, col3, col4 = st.columns(4)
 
@@ -244,26 +262,22 @@ def criar_kpis_ato2(df):
         st.metric(
             label="Traçado Predominante",
             value=f"{pct_reta:.1f}%",
-            delta="Trechos Retos"
         )
 
     with col2:
         st.metric(
             label="Acidentes Não Fatais",
             value=f"{pct_controlada:.1f}%",
-            delta="Feridos + Sem Vítimas"
         )
 
     with col3:
         st.metric(
             label="Causa Principal #1",
             value=causa_exibicao,
-            delta="Fator Humano Top 1"
         )
 
     with col4:
         st.metric(
             label="Acidentes em Dias Úteis",
             value=f"{pct_dias_uteis:.1f}%",
-            delta="Segunda a Sexta"
         )
