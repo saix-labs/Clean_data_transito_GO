@@ -380,13 +380,19 @@ def criar_fig_causa_funnel(df):
         color_discrete_sequence=px.colors.sequential.Blues_r
     )
 
-    # 4. Ajuste de layout
+    # 4. Ajuste de layout com fonte do eixo Y maior e branca
     fig.update_layout(
         showlegend=False,
         margin=dict(t=20, b=20, l=10, r=10),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='white')
+        font=dict(color='white'),
+        yaxis=dict(
+            tickfont=dict(
+                color='#FFFFFF',  # Branco puro
+                size=14,          # Tamanho da fonte ajustado
+            )
+        )
     )
     
     # Exibe apenas o valor e ajusta os rótulos para a cor branca
