@@ -414,21 +414,36 @@ def criar_fig_tipo_treemap(df):
     df_tipo = df['tipo_acidente'].value_counts().head(5).reset_index()
     df_tipo.columns = ['Tipo', 'Total']
 
-    # 2. Gráfico Treemap com escala de azuis
+    # 2. Gráfico Treemap com escala customizada (escuro no maior, legível nos menores)
+    escala_azuis_impacto = ['#4292c6', '#2171b5', '#08519c', '#08306b']
+
     fig = px.treemap(
         df_tipo,
         path=['Tipo'],
         values='Total',
         color='Total',
-        color_continuous_scale='Blues_r'
+        color_continuous_scale=escala_azuis_impacto
     )
 
-    # 3. Ajuste de layout idêntico ao Ato 1
+    # Estilização do texto e das bordas dos blocos
+    fig.update_traces(
+        textinfo="label+value",
+        textfont=dict(
+            color='#FFFFFF',  # Branco puro
+            size=14
+        ),
+        marker=dict(
+            line=dict(color='#111827', width=1.5) # Borda escura para destacar cada bloco
+        )
+    )
+
+    # 3. Ajuste de layout mantendo fundo transparente
     fig.update_layout(
         margin=dict(t=20, b=20, l=10, r=10),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='white')
+        font=dict(color='white'),
+        coloraxis_showscale=False
     )
     
     fig.update_traces(
