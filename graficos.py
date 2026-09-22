@@ -350,3 +350,80 @@ def criar_fig_classificacao(df):
         font=dict(color='white')
     )
     return fig
+
+
+
+
+def criar_fig_causa_funnel(df):
+    """
+    Gráfico de Funil para o Top 5 Causas de Acidentes.
+    Mantém o padrão de cores graduais em tons de azul e transparência do Ato 1.
+    """
+    # 1. Filtra Top 5 e ordena de forma descendente para a maior barra ficar no topo
+    df_causa = df['causa_acidente'].value_counts().head(5).reset_index()
+    df_causa.columns = ['Causa', 'Total']
+    df_causa = df_causa.sort_values(by='Total', ascending=True)
+    
+    # 2. Tratamento para encurtar rótulos longos
+    mapa_causas = {
+        'Reação tardia ou ineficiente do condutor': 'Reação Tardia/Ineficiente',
+        'Acessar a via sem observar a presença dos outros veículos': 'Entrar na Via sem Atenção'
+    }
+    df_causa['Causa'] = df_causa['Causa'].replace(mapa_causas)
+
+    # 3. Gráfico de Funil ajustado com a sequência correta de cores
+    fig = px.funnel(
+        df_causa,
+        y='Causa',
+        x='Total',
+        color='Causa',
+        color_discrete_sequence=px.colors.sequential.Blues_r
+    )
+
+    # 4. Ajuste de layout
+    fig.update_layout(
+        showlegend=False,
+        margin=dict(t=20, b=20, l=10, r=10),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='white')
+    )
+    
+    # Exibe apenas o valor e ajusta os rótulos para a cor branca
+    fig.update_traces(
+        textinfo="value",
+        textfont=dict(color="white", size=13)
+    )
+    return fig
+
+def criar_fig_tipo_treemap(df):
+    """
+    Gráfico de Treemap para o Top 5 Tipos de Acidentes.
+    Alinhado com as margens e paleta de azuis do Ato 1.
+    """
+    # 1. Filtra Top 5
+    df_tipo = df['tipo_acidente'].value_counts().head(5).reset_index()
+    df_tipo.columns = ['Tipo', 'Total']
+
+    # 2. Gráfico Treemap com escala de azuis
+    fig = px.treemap(
+        df_tipo,
+        path=['Tipo'],
+        values='Total',
+        color='Total',
+        color_continuous_scale='Blues_r'
+    )
+
+    # 3. Ajuste de layout idêntico ao Ato 1
+    fig.update_layout(
+        margin=dict(t=20, b=20, l=10, r=10),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='white')
+    )
+    
+    fig.update_traces(
+        textinfo="label+value",
+        marker=dict(cornerradius=4)
+    )
+    return fig

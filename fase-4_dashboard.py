@@ -12,7 +12,9 @@ from graficos import (
     #ato 2
     criar_kpis_ato2,
     criar_fig_tracado,
-    criar_fig_classificacao
+    criar_fig_classificacao,
+    criar_fig_causa_funnel,
+    criar_fig_tipo_treemap
 )
 
 # 1. Configuração inicial da página
@@ -72,4 +74,15 @@ elif pagina == "Ato 2: Investigação e Hotspots":
         st.subheader("Classificação dos Acidentes")
         st.plotly_chart(criar_fig_classificacao(df), use_container_width=True)
 
+    st.markdown("---")
 
+    # 3. Linha 2: Funil de Causas e Treemap de Tipos
+    col3, col4 = st.columns(2)
+
+    with col3:
+        st.subheader("Top 5 Causas de Acidentes")
+        st.plotly_chart(criar_fig_causa_funnel(df), use_container_width=True)
+
+    with col4:
+        st.subheader("Top 5 Tipos de Acidentes")
+        st.plotly_chart(criar_fig_tipo_treemap(df), use_container_width=True)
