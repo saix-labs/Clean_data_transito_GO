@@ -56,29 +56,41 @@ elif pagina == "Ato 2: Investigação e Hotspots":
 
 
 
-# --- SCRIPT DE VALIDAÇÃO DE DADOS ---
+"""# === VALIDAÇÃO DOS CARDS DE KPI NO TERMINAL ===
+print("\n" + "="*50)
+print("       VALIDAÇÃO DOS NÚMEROS DOS CARDS DE KPI")
+print("="*50)
 
-# 1. Ver a contagem exata e porcentagem por tipo de pista
-print("--- DISTRIBUIÇÃO POR TIPO DE PISTA ---")
-contagem_pista = df['tipo_pista'].value_counts(dropna=False)
-porcentagem_pista = df['tipo_pista'].value_counts(normalize=True, dropna=False) * 100
+# Card 1: Traçado Predominante (Reta)
+# Considera valores que contêm 'Reta' ou verifica a proporção da categoria exata
+total_registros = len(df)
+qtd_reta = df['tracado_via'].str.contains('Reta', case=False, na=False).sum()
+pct_reta_calc = (qtd_reta / total_registros) * 100
+print(f"\n[Card 1] Traçado Predominante (Reta):")
+print(f" - Qtd de registros com 'Reta': {qtd_reta} / {total_registros}")
+print(f" - Porcentagem Calculada: {pct_reta_calc:.2f}%")
 
-df_validacao_pista = pd.DataFrame({
-    'Qtd Registros': contagem_pista,
-    'Porcentagem (%)': porcentagem_pista.round(2)
-})
-print(df_validacao_pista)
+# Card 2: Acidentes Não Fatais (Com Vítimas Feridas + Sem Vítimas)
+qtd_nao_fatais = df['classificacao_acidente'].isin(['Com Vítimas Feridas', 'Sem Vítimas']).sum()
+pct_controlada_calc = (qtd_nao_fatais / total_registros) * 100
+print(f"\n[Card 2] Acidentes Não Fatais:")
+print(f" - Qtd de acidentes não fatais: {qtd_nao_fatais} / {total_registros}")
+print(f" - Porcentagem Calculada: {pct_controlada_calc:.2f}%")
 
-print("\n--------------------------------------")
+# Card 3: Causa Principal #1
+top_causa = df['causa_acidente'].value_counts().index[0]
+qtd_top_causa = df['causa_acidente'].value_counts().iloc[0]
+pct_top_causa = (qtd_top_causa / total_registros) * 100
+print(f"\n[Card 3] Causa Principal #1:")
+print(f" - Causa mais frequente: '{top_causa}'")
+print(f" - Frequência: {qtd_top_causa} ocorrências ({pct_top_causa:.2f}% do total)")
 
-# 2. Validar a conta do seu Card (Simples + Dupla)
-total = len(df)
-simples_dupla = df['tipo_pista'].str.contains('Simples|Dupla', case=False, na=False).sum()
-pct_card = (simples_dupla / total) * 100
-
-print(f"Total Geral de Registros: {total}")
-print(f"Registros (Simples + Dupla): {simples_dupla}")
-print(f"Resultado do Card: {pct_card:.2f}%")
-
-print("\n--- DISTRIBUIÇÃO POR CONDICAO METEREOLOGICA ---")
-print((df['condicao_metereologica'].value_counts(normalize=True) * 100).round(2))
+# Card 4: Acidentes em Dias Úteis (Segunda a Sexta)
+dias_uteis = ['segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira']
+qtd_dias_uteis = df['dia_semana'].isin(dias_uteis).sum()
+pct_dias_uteis_calc = (qtd_dias_uteis / total_registros) * 100
+print(f"\n[Card 4] Acidentes em Dias Úteis:")
+print(f" - Qtd em dias úteis: {qtd_dias_uteis} / {total_registros}")
+print(f" - Porcentagem Calculada: {pct_dias_uteis_calc:.2f}%")
+print("="*50 + "\n")
+"""
