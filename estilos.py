@@ -3,6 +3,15 @@ import streamlit as st
 def aplicar_estilos():
     st.markdown("""
         <style>
+        /* Ajuste do topo/cabeçalho para remover a linha branca e igualar a cor */
+        header[data-testid="stHeader"] {
+            background-color: #0b132b !important;
+        }
+
+        .block-container {
+            padding-top: 2rem !important;
+        }
+
         /* Fundo da tela central */
         .stApp {
             background-color: #0b132b;
