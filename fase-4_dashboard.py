@@ -54,7 +54,10 @@ if pagina == "Ato 1: Panorama Geral":
     total_acidentes = len(df)
     br_mais_critica = f"BR-{df['br'].mode()[0]}"
 
-    pct_pista_dupla = (df['tipo_pista'].str.contains('Múltipla|Dupla', case=False, na=False).sum() / total_acidentes) * 100
+    # Soma apenas Pista Simples + Pista Dupla
+    pct_pista_simples_dupla = (df['tipo_pista'].str.contains('Simples|Dupla', case=False, na=False).sum() / total_acidentes) * 100
+    
+    # Calcula Céu Claro / Sol
     pct_ceu_claro = (df['condicao_metereologica'].str.contains('Céu Claro|Sol', case=False, na=False).sum() / total_acidentes) * 100
 
     kpi1, kpi2, kpi3, kpi4 = st.columns(4)
@@ -66,12 +69,13 @@ if pagina == "Ato 1: Panorama Geral":
         st.metric(label="BR com Maior Volume", value=br_mais_critica)
 
     with kpi3:
-        st.metric(label="Acidentes em Pista Dupla/Múltipla", value=f"{pct_pista_dupla:.1f}%")
+        st.metric(label="Acidentes em Pista Simples e Dupla", value=f"{pct_pista_simples_dupla:.1f}%")
 
     with kpi4:
-        st.metric(label="Acidentes com Tempo Bom", value=f"{pct_ceu_claro:.1f}%")
+        st.metric(label="Acidentes a Céu Claro", value=f"{pct_ceu_claro:.1f}%")
 
     st.markdown("---")
+
 
     # --- LINHA 1: TURNO E RANKING DE BRS ---
     with st.container():
@@ -108,7 +112,7 @@ if pagina == "Ato 1: Panorama Geral":
     fig_mapa, df_municipio = criar_fig_mapa(df)
     st.plotly_chart(fig_mapa, use_container_width=True)
 
-    st.markdown("### 🏆 Top 5 Municípios com Maior Registro de Acidentes")
+    st.markdown("###  Top 5 Municípios com Maior Registro de Acidentes")
 
     top5_cidades = df_municipio.head(5)
 
@@ -129,3 +133,33 @@ elif pagina == "Ato 2: Investigação e Hotspots":
 elif pagina == "Ato 3: Análise Temporal e Solução":
     st.header("Ato 3: Picos de Horário e Proposta Técnica")
     st.write("Detalhamento do sentido crescente e sonorizadores.")
+
+
+
+
+# --- SCRIPT DE VALIDAÇÃO DE DADOS ---
+
+# 1. Ver a contagem exata e porcentagem por tipo de pista
+print("--- DISTRIBUIÇÃO POR TIPO DE PISTA ---")
+contagem_pista = df['tipo_pista'].value_counts(dropna=False)
+porcentagem_pista = df['tipo_pista'].value_counts(normalize=True, dropna=False) * 100
+
+df_validacao_pista = pd.DataFrame({
+    'Qtd Registros': contagem_pista,
+    'Porcentagem (%)': porcentagem_pista.round(2)
+})
+print(df_validacao_pista)
+
+print("\n--------------------------------------")
+
+# 2. Validar a conta do seu Card (Simples + Dupla)
+total = len(df)
+simples_dupla = df['tipo_pista'].str.contains('Simples|Dupla', case=False, na=False).sum()
+pct_card = (simples_dupla / total) * 100
+
+print(f"Total Geral de Registros: {total}")
+print(f"Registros (Simples + Dupla): {simples_dupla}")
+print(f"Resultado do Card: {pct_card:.2f}%")
+
+print("\n--- DISTRIBUIÇÃO POR CONDICAO METEREOLOGICA ---")
+print((df['condicao_metereologica'].value_counts(normalize=True) * 100).round(2))
