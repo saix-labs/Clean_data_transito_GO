@@ -47,9 +47,8 @@ def aplicar_estilos():
             text-shadow: 0 0 10px rgba(0, 243, 255, 0.6);
         }
 
-        /* === BOTÕES DA SIDEBAR (ABRIR E FECHAR) EM ESTILO NEON === */
-        button[data-testid="stExpandSidebarButton"],
-        button[data-testid="stCollapseSidebarButton"] {
+        /* === BOTÃO DE EXPANDIR (FORA DA SIDEBAR) === */
+        button[data-testid="stExpandSidebarButton"] {
             background-color: #0b132b !important;
             border: 2px solid #00f3ff !important;
             border-radius: 8px !important;
@@ -57,24 +56,55 @@ def aplicar_estilos():
             transition: all 0.2s ease-in-out !important;
         }
 
-        /* Cor do ícone das setas */
-        button[data-testid="stExpandSidebarButton"] *,
-        button[data-testid="stCollapseSidebarButton"] * {
+        button[data-testid="stExpandSidebarButton"] * {
             color: #00f3ff !important;
             fill: #00f3ff !important;
         }
 
-        /* Efeito de destaque ao passar o mouse */
-        button[data-testid="stExpandSidebarButton"]:hover,
-        button[data-testid="stCollapseSidebarButton"]:hover {
+        button[data-testid="stExpandSidebarButton"]:hover {
             background-color: #00f3ff !important;
             box-shadow: 0 0 18px #00f3ff !important;
         }
 
-        button[data-testid="stExpandSidebarButton"]:hover *,
-        button[data-testid="stCollapseSidebarButton"]:hover * {
+        button[data-testid="stExpandSidebarButton"]:hover * {
             color: #0b132b !important;
             fill: #0b132b !important;
+        }
+
+        /* === BOTÃO DE RECOLHER (DENTRO DA SIDEBAR - SEMPRE VISÍVEL) === */
+        [data-testid="stSidebarHeader"] {
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+
+        button[data-testid="stCollapseSidebarButton"],
+        [data-testid="stSidebarHeader"] button {
+            background-color: #1c2541 !important;
+            border: 2px solid #00f3ff !important;
+            border-radius: 8px !important;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.6) !important;
+            transition: all 0.2s ease-in-out !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+
+        button[data-testid="stCollapseSidebarButton"] *,
+        [data-testid="stSidebarHeader"] button * {
+            color: #00f3ff !important;
+            fill: #00f3ff !important;
+            opacity: 1 !important;
+        }
+
+        button[data-testid="stCollapseSidebarButton"]:hover,
+        [data-testid="stSidebarHeader"] button:hover {
+            background-color: #00f3ff !important;
+            box-shadow: 0 0 18px #00f3ff !important;
+        }
+
+        button[data-testid="stCollapseSidebarButton"]:hover *,
+        [data-testid="stSidebarHeader"] button:hover * {
+            color: #1c2541 !important;
+            fill: #1c2541 !important;
         }
 
         /* === RESPIRO/ESPAÇAMENTO ENTRE LINHAS DO DASHBOARD === */
