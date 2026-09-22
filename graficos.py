@@ -281,3 +281,72 @@ def criar_kpis_ato2(df):
             label="Acidentes em Dias Úteis",
             value=f"{pct_dias_uteis:.1f}%",
         )
+
+
+
+def criar_fig_tracado(df):
+    """
+    Gera gráfico de barras verticais para o Top 7 traçados de via.
+    """
+    df_tracado = df['tracado_via'].value_counts().head(7).reset_index()
+    df_tracado.columns = ['Traçado', 'Total']
+    
+    fig = px.bar(
+        df_tracado,
+        x='Traçado',
+        y='Total',
+        text='Total',
+        color_discrete_sequence=['#1f77b4'] # Azul mantendo o padrão
+    )
+    
+    fig.update_traces(
+        textposition='outside',
+        texttemplate='%{text:,}'
+    )
+    
+    fig.update_layout(
+        xaxis_title=None,
+        yaxis_title=None,
+        showlegend=False,
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='white'),
+        margin=dict(t=20, b=20, l=10, r=10),
+        yaxis=dict(showticklabels=False)
+    )
+    return fig
+
+
+def criar_fig_classificacao(df):
+    """
+    Gera gráfico de rosca (Donut) com mapa de cores fixo por gravidade.
+    """
+    df_class = df['classificacao_acidente'].value_counts().reset_index()
+    df_class.columns = ['Classificação', 'Total']
+
+    # Mapeamento explícito de cores para não trocar a lógica se a ordem mudar
+    cores_mapa = {
+        'Sem Vítimas': '#2ca02c',          # Verde
+        'Com Vítimas Feridas': '#ff7f0e',  # Laranja
+        'Com Vítimas Fatais': '#d62728'    # Vermelho
+    }
+
+    fig = px.pie(
+        df_class,
+        values='Total',
+        names='Classificação',
+        hole=0.5,
+        color='Classificação',
+        color_discrete_map=cores_mapa
+    )
+    
+    fig.update_traces(textinfo='percent+label')
+    
+    fig.update_layout(
+        showlegend=False,
+        margin=dict(t=20, b=20, l=10, r=10),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='white')
+    )
+    return fig

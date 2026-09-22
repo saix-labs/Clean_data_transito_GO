@@ -7,8 +7,12 @@ from graficos import (
     criar_fig_pista, 
     criar_fig_clima, 
     criar_fig_mapa,
+    criar_kpis_ato1,
+
+    #ato 2
     criar_kpis_ato2,
-    criar_kpis_ato1
+    criar_fig_tracado,
+    criar_fig_classificacao
 )
 
 # 1. Configuração inicial da página
@@ -49,10 +53,24 @@ with st.sidebar:
 
 if pagina == "Ato 1: Panorama Geral":
     criar_kpis_ato1(df)
-    
-elif pagina == "Ato 2: Investigação e Hotspots":
-    criar_kpis_ato2(df)
+    # (Chamadas dos gráficos do Ato 1 continuam aqui)
 
+elif pagina == "Ato 2: Investigação e Hotspots":
+    # 1. Topo: KPIs do Ato 2
+    criar_kpis_ato2(df)
+    
+    st.markdown("---")
+    
+    # 2. Linha 1: Traçado da Via e Severidade
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.subheader("Top Traçados da Via")
+        st.plotly_chart(criar_fig_tracado(df), use_container_width=True)
+
+    with col2:
+        st.subheader("Classificação dos Acidentes")
+        st.plotly_chart(criar_fig_classificacao(df), use_container_width=True)
 
 
 
@@ -94,3 +112,15 @@ print(f" - Qtd em dias úteis: {qtd_dias_uteis} / {total_registros}")
 print(f" - Porcentagem Calculada: {pct_dias_uteis_calc:.2f}%")
 print("="*50 + "\n")
 """
+
+
+"""# === BLOCO DE DIAGNÓSTICO DO ATO 2 (PRINT NO TERMINAL) ===
+print("\n" + "="*50)
+print("DIAGNÓSTICO DE DADOS - ATO 2")
+print("="*50)
+
+print("\n--- 1. TRAÇADO DA VIA (TOP 10) ---")
+print(df['tracado_via'].value_counts().head(10))
+
+print("\n--- 2. CLASSIFICAÇÃO DO ACIDENTE (SEVERIDADE) ---")
+print(df['classificacao_acidente'].value_counts())"""
