@@ -371,14 +371,17 @@ def criar_fig_causa_funnel(df):
     }
     df_causa['Causa'] = df_causa['Causa'].replace(mapa_causas)
 
-    # 3. Gráfico de Funil ajustado com a sequência correta de cores
+    # 3. Gráfico de Funil com azul marinho intenso e vibrante no topo
+    tons_impacto = ['#08306b', '#08519c', '#2171b5', '#4292c6', '#6baed6']
+    
     fig = px.funnel(
         df_causa,
         y='Causa',
         x='Total',
         color='Causa',
-        color_discrete_sequence=px.colors.sequential.Blues_r
+        color_discrete_sequence=tons_impacto[::-1]
     )
+
 
     # 4. Ajuste de layout com fonte do eixo Y maior e branca
     fig.update_layout(
