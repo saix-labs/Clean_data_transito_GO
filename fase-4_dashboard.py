@@ -58,43 +58,4 @@ if pagina == "Ato 1: Panorama Geral":
     # (Chamadas dos gráficos do Ato 1 continuam aqui)
 
 elif pagina == "Ato 2: Investigação e Hotspots":
-    # CSS EXCLUSIVO DO ATO 2 (para afastar as linhas de gráficos sem mexer na Página 1)
-    st.markdown(
-        """
-        <style>
-            div[data-testid="stHorizontalBlock"] {
-                margin-bottom: 10rem !important;
-            }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-    # 1. Topo: KPIs do Ato 2
     criar_kpis_ato2(df)
-    
-    st.markdown("---")
-    
-    # 2. Linha 1: Traçado da Via e Severidade
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.subheader("Top Traçados da Via")
-        st.plotly_chart(criar_fig_tracado(df), use_container_width=True)
-
-    with col2:
-        st.subheader("Classificação dos Acidentes")
-        st.plotly_chart(criar_fig_classificacao(df), use_container_width=True)
-
-    st.markdown("---")
-
-    # 3. Linha 2: Funil de Causas e Treemap de Tipos
-    col3, col4 = st.columns(2)
-
-    with col3:
-        st.subheader("Top 5 Causas de Acidentes")
-        st.plotly_chart(criar_fig_causa_funnel(df), use_container_width=True)
-
-    with col4:
-        st.subheader("Top 5 Tipos de Acidentes")
-        st.plotly_chart(criar_fig_tipo_treemap(df), use_container_width=True)

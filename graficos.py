@@ -234,40 +234,16 @@ def criar_fig_mapa(df):
 def criar_kpis_ato2(df):
     st.title("Ato 2: Investigação e Hotspots")
     st.markdown("---")
-    total = len(df)
-    if total == 0:
-        st.warning("Nenhum dado disponível.")
-        return
 
-    # 1. Traçado Predominante (Ocorrências em trecho que contém Reta)
-    qtd_reta = df['tracado_via'].astype(str).str.contains('Reta', case=False, na=False).sum()
-    pct_reta = (qtd_reta / total) * 100
-
-    # 2. Gravidade Controlada (Feridos + Sem Vítimas = Não Fatais)
-    qtd_controlada = df['classificacao_acidente'].isin(['Com Vítimas Feridas', 'Sem Vítimas']).sum()
-    pct_controlada = (qtd_controlada / total) * 100
-
-    # 3. Causa Principal #1
-    causa_series = df['causa_acidente'].dropna()
-    causa_top1 = causa_series.mode()[0] if not causa_series.empty else "N/A"
-    
-    # Tratamento para truncar/formatar nome da causa no card
-    if "Reação tardia" in causa_top1 or "ineficiente" in causa_top1:
-        causa_exibicao = "Reação Tardia / Ineficiente"
-    elif len(causa_top1) > 22:
-        causa_exibicao = causa_top1[:22] + "..."
-    else:
-        causa_exibicao = causa_top1
-
-    # 4. Dias Úteis (segunda a sexta)
-    dias_uteis = ['segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira']
-    qtd_dias_uteis = df['dia_semana'].astype(str).str.lower().isin(dias_uteis).sum()
-    pct_dias_uteis = (qtd_dias_uteis / total) * 100
-
-    # CSS isolado apenas para o VALOR do Card 3
+    # --- CSS EXCLUSIVO DO ATO 2 ---
+    # 1. Espaçamento entre as linhas de blocos
+    # 2. Ajuste do tamanho da fonte no Card 3
     st.markdown(
         """
         <style>
+            div[data-testid="stHorizontalBlock"] {
+                margin-bottom: 10rem !important;
+            }
             div[data-testid="stColumn"]:nth-child(3) [data-testid="stMetricValue"] {
                 font-size: 1.05rem !important;
                 line-height: 1.2 !important;
@@ -282,32 +258,76 @@ def criar_kpis_ato2(df):
         unsafe_allow_html=True
     )
 
-    # Renderização visual dos 4 cards de KPI
-    col1, col2, col3, col4 = st.columns(4)
+    # --- CARDS DE KPI (TOPO) ---
+    total = len(df)
+    if total == 0:
+        st.warning("Nenhum dado disponível.")
+        return
+
+    # 1. Traçado Predominante
+    qtd_reta = df['tracado_via'].astype(str).str.contains('Reta', case=False, na=False).sum()
+    pct_reta = (qtd_reta / total) * 100
+
+    # 2. Gravidade Controlada (Não Fatais)
+    qtd_controlada = df['classificacao_acidente'].isin(['Com Vítimas Feridas', 'Sem Vítimas']).sum()
+    pct_controlada = (qtd_controlada / total) * 100
+
+    # 3. Causa Principal #1
+    causa_series = df['causa_acidente'].dropna()
+    causa_top1 = causa_series.mode()[0] if not causa_series.empty else "N/A"
+    
+    if "Reação tardia" in causa_top1 or "ineficiente" in causa_top1:
+        causa_exibicao = "Reação Tardia / Ineficiente"
+    elif len(causa_top1) > 22:
+        causa_exibicao = causa_top1[:22] + "..."
+    else:
+        causa_exibicao = causa_top1
+
+    # 4. Dias Úteis
+    dias_uteis = ['segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira']
+    qtd_dias_uteis = df['dia_semana'].astype(str).str.lower().isin(dias_uteis).sum()
+    pct_dias_uteis = (qtd_dias_uteis / total) * 100
+
+    # Renderização dos 4 Cards
+    kpi1, kpi2, kpi3, kpi4 = st.columns(4)
+
+    with kpi1:
+        st.metric(label="Traçado Predominante", value=f"{pct_reta:.1f}%")
+
+    with kpi2:
+        st.metric(label="Acidentes Não Fatais", value=f"{pct_controlada:.1f}%")
+
+    with kpi3:
+        st.metric(label="Causa Principal #1", value=causa_exibicao)
+
+    with kpi4:
+        st.metric(label="Acidentes em Dias Úteis", value=f"{pct_dias_uteis:.1f}%")
+
+    st.markdown("---")
+
+    # --- LINHA 1 DE GRÁFICOS: TRAÇADO E CLASSIFICAÇÃO ---
+    col1, col2 = st.columns(2)
 
     with col1:
-        st.metric(
-            label="Traçado Predominante",
-            value=f"{pct_reta:.1f}%",
-        )
+        st.subheader("Top Traçados da Via")
+        st.plotly_chart(criar_fig_tracado(df), use_container_width=True)
 
     with col2:
-        st.metric(
-            label="Acidentes Não Fatais",
-            value=f"{pct_controlada:.1f}%",
-        )
+        st.subheader("Classificação dos Acidentes")
+        st.plotly_chart(criar_fig_classificacao(df), use_container_width=True)
+
+    st.markdown("---")
+
+    # --- LINHA 2 DE GRÁFICOS: CAUSAS E TIPOS ---
+    col3, col4 = st.columns(2)
 
     with col3:
-        st.metric(
-            label="Causa Principal #1",
-            value=causa_exibicao,
-        )
+        st.subheader("Top 5 Causas de Acidentes")
+        st.plotly_chart(criar_fig_causa_funnel(df), use_container_width=True)
 
     with col4:
-        st.metric(
-            label="Acidentes em Dias Úteis",
-            value=f"{pct_dias_uteis:.1f}%",
-        )
+        st.subheader("Top 5 Tipos de Acidentes")
+        st.plotly_chart(criar_fig_tipo_treemap(df), use_container_width=True)
 
 
 
