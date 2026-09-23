@@ -587,23 +587,23 @@ def renderizar_infografico_dias(df):
         }
 
         /* Painel Neon Cyan proporcional aos 7 botões */
-.painel-neon-box {
-    border: 1.5px solid #00F3FF;
-    box-shadow: 0px 0px 10px rgba(0, 243, 255, 0.25);
-    border-radius: 8px;
-    padding: 14px;
-    background: rgba(10, 25, 47, 0.6);
-    text-align: center;
-    height: 290px;
+        .painel-neon-box {
+        border: 1.5px solid #00F3FF;
+        box-shadow: 0px 0px 10px rgba(0, 243, 255, 0.25);
+        border-radius: 8px;
+        padding: 14px;
+        background: rgba(10, 25, 47, 0.6);
+        text-align: center;
+        height: 290px;
     
-    width: 600px; /* <--- ESTA É A LINHA DA LARGURA! */
-    margin: 0 auto; /* Centraliza a caixa na coluna se ela for menor */
+        width: 600px; /* <--- ESTA É A LINHA DA LARGURA! */
+        margin: 0 auto; /* Centraliza a caixa na coluna se ela for menor */
     
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        }
 
         .btn-scroll-container {
             display: flex;
