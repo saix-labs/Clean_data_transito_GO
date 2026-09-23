@@ -512,3 +512,165 @@ def criar_fig_tipo_treemap(df):
         marker=dict(cornerradius=4)
     )
     return fig
+
+
+
+import streamlit as st
+
+def obter_dados_causa_dia(df, dia_semana_str):
+    """Calcula total, causa #1 e % para o dia selecionado (em minúsculo)."""
+    # Converte para minúsculo para bater exatamente com os dados do DF
+    dia_chave = dia_semana_str.lower()
+    
+    # Filtra mantendo compatibilidade com texto em minúsculo
+    df_dia = df[df['dia_semana'].astype(str).str.lower() == dia_chave]
+    total_dia = len(df_dia)
+    
+    if total_dia == 0:
+        return {"total": 0, "causa_top1": "Nenhum registro", "pct_top1": 0.0}
+
+    causas_count = df_dia['causa_acidente'].value_counts()
+    causa_top1 = causas_count.index[0]
+    qtd_top1 = causas_count.iloc[0]
+    pct_top1 = (qtd_top1 / total_dia) * 100
+
+    # Dicionário ajustado para os nomes reais da sua base
+    mapa_causas = {
+        'Reação tardia ou ineficiente do condutor': 'Reação Tardia/Ineficiente',
+        'Ausência de reação do condutor': 'Ausência de Reação',
+        'Ingestão de álcool pelo condutor': 'Ingestão de Álcool',
+        'Acessar a via sem observar a presença dos outros veículos': 'Acessar Via sem Atenção',
+        'Velocidade Incompatível': 'Velocidade Incompatível'
+    }
+    causa_formatada = mapa_causas.get(causa_top1, causa_top1)
+
+    return {
+        "total": total_dia,
+        "causa_top1": causa_formatada,
+        "pct_top1": pct_top1
+    }
+
+
+def renderizar_infografico_dias(df):
+    """
+    Renderiza os 7 dias como cards/botões enxutos na esquerda e o painel Neon Cyan na direita.
+    """
+    if 'dia_focado' not in st.session_state:
+        st.session_state['dia_focado'] = 'Segunda-Feira'
+
+    dias_exibicao = ['Segunda-Feira', 'Terça-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira', 'Sábado', 'Domingo']
+
+    # Estilização para garantir que tudo caiba na tela sem scroll
+    st.markdown("""
+        <style>
+        div[data-testid="stVerticalBlock"] > div {
+            gap: 0.25rem !important;
+        }
+
+        /* Ajuste do botão nativo para virar o próprio card compacto */
+        div.stButton > button {
+            width: 100% !important;
+            padding: 2px 8px !important;
+            min-height: 28px !important;
+            height: 28px !important;
+            font-size: 12px !important;
+            font-weight: 500 !important;
+            background-color: rgba(255, 255, 255, 0.03) !important;
+            color: #A0AEC0 !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 5px !important;
+        }
+
+        div.stButton > button:hover {
+            border-color: #00F3FF !important;
+            color: #00F3FF !important;
+        }
+
+        /* Painel Neon Cyan proporcional aos 7 botões */
+        .painel-neon-box {
+            border: 1.5px solid #00F3FF;
+            box-shadow: 0px 0px 10px rgba(0, 243, 255, 0.25);
+            border-radius: 8px;
+            padding: 14px;
+            background: rgba(10, 25, 47, 0.6);
+            text-align: center;
+            height: 220px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-scroll-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 4px;
+            margin-bottom: 4px;
+        }
+        .btn-scroll-circle {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1.5px solid #00F3FF;
+            box-shadow: 0 0 6px rgba(0, 243, 255, 0.4);
+            background: transparent;
+            color: #00F3FF;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    st.subheader("Análise Detalhada: Causa Principal por Dia")
+
+    # Coluna 1 justa (0.7) e Coluna 2 (1.3)
+    col_cards, col_painel = st.columns([0.7, 1.3])
+
+    # Coluna Esquerda: 7 botões/cards
+    with col_cards:
+        for dia in dias_exibicao:
+            is_ativo = (st.session_state['dia_focado'] == dia)
+            tipo_btn = "primary" if is_ativo else "secondary"
+            
+            if st.button(dia, key=f"card_dia_{dia}", type=tipo_btn, use_container_width=True):
+                st.session_state['dia_focado'] = dia
+                st.rerun()
+
+    # Coluna Direita: Painel Neon Cyan
+    with col_painel:
+        dia_atual = st.session_state['dia_focado']
+        dados_dia = obter_dados_causa_dia(df, dia_atual)
+        
+        st.markdown(f"""
+            <div class="painel-neon-box">
+                <h4 style="color: #00F3FF; margin: 0; font-size: 17px;">{dia_atual}</h4>
+                <div style="font-size: 12px; color: #A0AEC0; margin-top: 2px; margin-bottom: 8px;">
+                    Total do dia: <b style="color: #FFFFFF;">{dados_dia['total']:,} acidentes</b>
+                </div>
+                <hr style="border: 0.5px solid rgba(0, 243, 255, 0.2); width: 85%; margin: 2px 0 8px 0;">
+                <div style="font-size: 10px; color: #A0AEC0; text-transform: uppercase; letter-spacing: 0.8px;">Causa #1 Mais Frequente</div>
+                <div style="font-size: 14px; color: #FFFFFF; font-weight: bold; margin: 4px 0;">
+                    {dados_dia['causa_top1']}
+                </div>
+                <div style="font-size: 18px; color: #00F3FF; font-weight: bold; margin-top: 2px;">
+                    {dados_dia['pct_top1']:.1f}%
+                    <span style="font-size: 10px; color: #A0AEC0; font-weight: normal;">dos acidentes</span>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    # Botão de scroll compacto logo abaixo
+    st.markdown("<div id='grafico-barras-dias'></div>", unsafe_allow_html=True)
+    st.markdown("""
+        <div class="btn-scroll-container">
+            <a href="#grafico-barras-dias" style="text-decoration: none;">
+                <div class="btn-scroll-circle" title="Rolar para baixo">
+                    ↓
+                </div>
+            </a>
+        </div>
+    """, unsafe_allow_html=True)

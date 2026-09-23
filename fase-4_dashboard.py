@@ -14,7 +14,8 @@ from graficos import (
     criar_fig_tracado,
     criar_fig_classificacao,
     criar_fig_causa_funnel,
-    criar_fig_tipo_treemap
+    criar_fig_tipo_treemap,
+    renderizar_infografico_dias
 )
 
 # 1. Configuração inicial da página
@@ -59,3 +60,4 @@ if pagina == "Ato 1: Panorama Geral":
 
 elif pagina == "Ato 2: Investigação e Hotspots":
     criar_kpis_ato2(df)
+    renderizar_infografico_dias(df)
