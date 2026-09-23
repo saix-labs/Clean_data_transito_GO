@@ -312,8 +312,15 @@ def criar_fig_tracado(df):
         plot_bgcolor='rgba(0,0,0,0)',
         font=dict(color='white'),
         margin=dict(t=20, b=20, l=10, r=10),
-        yaxis=dict(showticklabels=False)
+        xaxis=dict(tickfont=dict(color='#FFFFFF', size=13)),
+        yaxis=dict(showticklabels=False, tickfont=dict(color='#FFFFFF', size=14))
     )
+    
+    # Garante que os rótulos diretos (números/textos sobre as barras ou elementos) fiquem brancos
+    fig.update_traces(
+        textfont=dict(color='#FFFFFF', size=13)
+    )
+    
     return fig
 
 
