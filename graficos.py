@@ -122,8 +122,7 @@ def criar_fig_br(df):
         y='BR', 
         orientation='h',
         text='Total',
-        color='Total',
-        color_continuous_scale='Blues'
+        color_discrete_sequence=['#1f77b4'] # Azul sólido mantendo o padrão visual
     )
     fig.update_layout(
         yaxis={'categoryorder':'total ascending', 'tickfont': {'color': '#FFFFFF', 'size': 14}}, 
