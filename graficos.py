@@ -164,8 +164,16 @@ def criar_fig_clima(df):
     fig.update_layout(
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='white')
+        font=dict(color='white'),
+        xaxis=dict(tickfont=dict(color='#FFFFFF', size=13)),
+        yaxis=dict(tickfont=dict(color='#FFFFFF', size=14))
     )
+    
+    # Força os rótulos diretos do gráfico (números, porcentagens ou legendas internas) a ficarem brancos
+    fig.update_traces(
+        textfont=dict(color='#FFFFFF', size=13)
+    )
+    
     return fig
 
 
