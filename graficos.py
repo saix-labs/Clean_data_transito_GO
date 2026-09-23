@@ -95,7 +95,11 @@ def criar_fig_turno(df):
         hole=0.5,
         color_discrete_sequence=px.colors.sequential.Blues_r
     )
-    fig.update_traces(textinfo='percent+label')
+    fig.update_traces(
+        textinfo='percent+label',
+        textfont=dict(color='#FFFFFF', size=13)
+    )
+    
     fig.update_layout(
         showlegend=False, 
         margin=dict(t=20, b=20, l=10, r=10),
@@ -103,6 +107,7 @@ def criar_fig_turno(df):
         plot_bgcolor='rgba(0,0,0,0)',
         font=dict(color='white')
     )
+    
     return fig
 
 
