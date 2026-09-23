@@ -58,6 +58,18 @@ if pagina == "Ato 1: Panorama Geral":
     # (Chamadas dos gráficos do Ato 1 continuam aqui)
 
 elif pagina == "Ato 2: Investigação e Hotspots":
+    # CSS EXCLUSIVO DO ATO 2 (para afastar as linhas de gráficos sem mexer na Página 1)
+    st.markdown(
+        """
+        <style>
+            div[data-testid="stHorizontalBlock"] {
+                margin-bottom: 10rem !important;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
     # 1. Topo: KPIs do Ato 2
     criar_kpis_ato2(df)
     
