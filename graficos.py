@@ -319,17 +319,14 @@ def criar_fig_tracado(df):
 
 def criar_fig_classificacao(df):
     """
-    Gera gráfico de rosca (Donut) com mapa de cores fixo por gravidade.
+    Gera gráfico de rosca (Donut) com rótulos internos, tamanho de fonte 13
+    e paleta de cores azuis padronizada com o modelo.
     """
     df_class = df['classificacao_acidente'].value_counts().reset_index()
     df_class.columns = ['Classificação', 'Total']
 
-    # Mapeamento explícito de cores para não trocar a lógica se a ordem mudar
-    cores_mapa = {
-        'Sem Vítimas': '#2ca02c',          # Verde
-        'Com Vítimas Feridas': '#ff7f0e',  # Laranja
-        'Com Vítimas Fatais': '#d62728'    # Vermelho
-    }
+    # Paleta de tons de azul alinhada ao modelo
+    tons_impacto = ['#08306b', '#2171b5', '#6baed6']
 
     fig = px.pie(
         df_class,
@@ -337,11 +334,20 @@ def criar_fig_classificacao(df):
         names='Classificação',
         hole=0.5,
         color='Classificação',
-        color_discrete_map=cores_mapa
+        color_discrete_sequence=tons_impacto
     )
     
-    fig.update_traces(textinfo='percent+label')
+    # Rótulos DENTRO dos blocos, com tamanho 13 e cor branca (igual ao modelo)
+    fig.update_traces(
+        textinfo='percent+label',
+        textposition='inside',
+        textfont=dict(
+            color='#FFFFFF',  # Branco puro
+            size=13           # Tamanho exatamente igual ao do modelo
+        )
+    )
     
+    # Layout transparente
     fig.update_layout(
         showlegend=False,
         margin=dict(t=20, b=20, l=10, r=10),
@@ -349,6 +355,7 @@ def criar_fig_classificacao(df):
         plot_bgcolor='rgba(0,0,0,0)',
         font=dict(color='white')
     )
+    
     return fig
 
 
