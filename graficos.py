@@ -121,13 +121,20 @@ def criar_fig_br(df):
         color_continuous_scale='Blues'
     )
     fig.update_layout(
-        yaxis={'categoryorder':'total ascending'}, 
+        yaxis={'categoryorder':'total ascending', 'tickfont': {'color': '#FFFFFF', 'size': 14}}, 
+        xaxis=dict(tickfont=dict(color='#FFFFFF', size=13)),
         showlegend=False, 
         coloraxis_showscale=False,
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         font=dict(color='white')
     )
+    
+    # Garante que os valores e textos dentro do gráfico fiquem brancos
+    fig.update_traces(
+        textfont=dict(color='#FFFFFF', size=13)
+    )
+    
     return fig
 
 
