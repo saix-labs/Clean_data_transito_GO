@@ -613,8 +613,8 @@ def renderizar_infografico_dias(df):
             margin-bottom: 4px;
         }
         .btn-scroll-circle {
-            width: 28px;
-            height: 28px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             border: 1.5px solid #00F3FF;
             box-shadow: 0 0 6px rgba(0, 243, 255, 0.4);
@@ -630,6 +630,7 @@ def renderizar_infografico_dias(df):
     """, unsafe_allow_html=True)
 
     st.subheader("Análise Detalhada: Causa Principal por Dia")
+    st.markdown('<div style="margin-bottom: 15px;"></div>', unsafe_allow_html=True)  # Espaçador vertical de 15px
 
     # Coluna 1 justa (0.7) e Coluna 2 (1.3)
     col_cards, col_painel = st.columns([0.4, 1])
