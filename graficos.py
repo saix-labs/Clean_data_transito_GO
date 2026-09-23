@@ -591,7 +591,7 @@ def renderizar_infografico_dias(df):
         border: 1.5px solid #00F3FF;
         box-shadow: 0px 0px 10px rgba(0, 243, 255, 0.25);
         border-radius: 8px;
-        padding: 14px;
+        padding: 1px;
         background: rgba(10, 25, 47, 0.6);
         text-align: center;
         height: 290px;
@@ -652,18 +652,18 @@ def renderizar_infografico_dias(df):
         
         st.markdown(f"""
             <div class="painel-neon-box">
-                <h4 style="color: #00F3FF; margin: 0; font-size: 17px;">{dia_atual}</h4>
-                <div style="font-size: 12px; color: #A0AEC0; margin-top: 2px; margin-bottom: 8px;">
+                <h4 style="color: #00F3FF; margin: 0; font-size: 26px;">{dia_atual}</h4>
+                <div style="font-size: 18px; color: #A0AEC0; margin-top: 2px; margin-bottom: 8px;">
                     Total do dia: <b style="color: #FFFFFF;">{dados_dia['total']:,} acidentes</b>
                 </div>
                 <hr style="border: 0.5px solid rgba(0, 243, 255, 0.2); width: 85%; margin: 2px 0 8px 0;">
-                <div style="font-size: 10px; color: #A0AEC0; text-transform: uppercase; letter-spacing: 0.8px;">Causa #1 Mais Frequente</div>
-                <div style="font-size: 14px; color: #FFFFFF; font-weight: bold; margin: 4px 0;">
+                <div style="font-size: 15px; color: #A0AEC0; text-transform: uppercase; letter-spacing: 0.8px;">Causa #1 Mais Frequente</div>
+                <div style="font-size: 21px; color: #FFFFFF; font-weight: bold; margin: 4px 0;">
                     {dados_dia['causa_top1']}
                 </div>
-                <div style="font-size: 18px; color: #00F3FF; font-weight: bold; margin-top: 2px;">
+                <div style="font-size: 27px; color: #00F3FF; font-weight: bold; margin-top: 2px;">
                     {dados_dia['pct_top1']:.1f}%
-                    <span style="font-size: 10px; color: #A0AEC0; font-weight: normal;">dos acidentes</span>
+                    <span style="font-size: 15px; color: #A0AEC0; font-weight: normal;">dos acidentes</span>
                 </div>
             </div>
         """, unsafe_allow_html=True)
