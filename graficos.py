@@ -957,3 +957,113 @@ def criar_fig_acidentes_por_hora(df):
     )
 
     return fig
+
+
+
+
+
+def criar_fig_sentido_bipolar(df):
+    """
+    Gera gráfico de barras bipolares/divergentes para comparar Sentido Crescente vs Decrescente.
+    """
+    # 1. Filtra apenas os sentidos principais
+    df_sentido = df[df['sentido_via'].isin(['Crescente', 'Decrescente'])].copy()
+    
+    # 2. Agrupa a contagem
+    contagem = df_sentido['sentido_via'].value_counts().reset_index()
+    contagem.columns = ['Sentido', 'Total']
+    
+    qtd_crescente = contagem[contagem['Sentido'] == 'Crescente']['Total'].values[0] if 'Crescente' in contagem['Sentido'].values else 0
+    qtd_decrescente = contagem[contagem['Sentido'] == 'Decrescente']['Total'].values[0] if 'Decrescente' in contagem['Sentido'].values else 0
+    
+    # 3. DataFrame divergente (Decrescente negativo para ir à esquerda)
+    df_bipolar = pd.DataFrame({
+        'Categoria': ['Fluxo da Via'],
+        'Crescente': [qtd_crescente],
+        'Decrescente': [-qtd_decrescente]
+    })
+
+    # 4. Gráfico Plotly
+    fig = px.bar(
+        df_bipolar,
+        y='Categoria',
+        x=['Decrescente', 'Crescente'],
+        orientation='h',
+        color_discrete_map={
+            'Crescente': '#2171b5',   # Azul vibrante
+            'Decrescente': '#08306b'  # Azul marinho profundo
+        }
+    )
+
+    # Ajuste de tooltip/hover
+    fig.update_traces(
+        hovertemplate='<b>%{data.name}</b><br>Total: %{customdata:,}<extra></extra>'
+    )
+    fig.data[0].customdata = [qtd_decrescente]
+    fig.data[1].customdata = [qtd_crescente]
+
+    # Rótulos diretos sobre as barras
+    fig.add_annotation(
+        x=-qtd_decrescente / 2, y=0,
+        text=f"Decrescente<br><b>{qtd_decrescente:,}</b>",
+        showarrow=False,
+        font=dict(color='#FFFFFF', size=13)
+    )
+    fig.add_annotation(
+        x=qtd_crescente / 2, y=0,
+        text=f"Crescente<br><b>{qtd_crescente:,}</b>",
+        showarrow=False,
+        font=dict(color='#FFFFFF', size=13)
+    )
+
+    # 5. Layout com fundo transparente
+    fig.update_layout(
+        barmode='relative',
+        showlegend=False,
+        xaxis=dict(
+            showticklabels=False,
+            showgrid=False,
+            zeroline=True,
+            zerolinecolor='#FFFFFF',
+            zerolinewidth=1.5
+        ),
+        yaxis=dict(showticklabels=False, showgrid=False),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        margin=dict(t=10, b=10, l=10, r=10),
+        height=260
+    )
+    
+    return fig
+
+
+def renderizar_secao_sentido_via(df):
+    """
+    Função principal que renderiza a seção completa de Sentido da Via em 2 colunas,
+    mantendo o padrão visual e de isolamento de tela (F11) do Ato 1.
+    """
+    # 1. Espaçador no mesmo padrão do Ato 1 (empurra o bloco para o topo da tela)
+    st.markdown("<div style='margin-bottom: 35vh;'></div>", unsafe_allow_html=True)
+
+    # 2. Layout em 2 Colunas
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.subheader("Direcionamento do Fluxo (Sentido da Via)")
+        fig_sentido = criar_fig_sentido_bipolar(df)
+        st.plotly_chart(fig_sentido, use_container_width=True)
+
+    with col2:
+        st.subheader("Análise Estratégica do Fluxo")
+        st.markdown("""
+        <div style="background-color: #111827; padding: 20px; border-radius: 8px; border-left: 4px solid #2171b5; color: #FFFFFF; min-height: 260px;">
+            <h4 style="margin-top: 0; color: #4292c6; font-size: 16px;">Dinâmica Pendular e Retorno ao Lar</h4>
+            <p style="font-size: 14px; line-height: 1.5; color: #E2E8F0; margin-bottom: 12px;">
+                A maior concentração no <b>Sentido Crescente (3.581 acidentes)</b> reflete o padrão de mobilidade das cidades polos empregatícias. 
+                O pico de ocorrências coincide com a janela do final do dia, no trajeto de volta para casa, onde o cansaço do condutor amplia o risco.
+            </p>
+            <p style="font-size: 13px; line-height: 1.4; color: #94A3B8; margin-bottom: 0;">
+                <b>Nota:</b> O volume expressivo no sentido decrescente (2.904 acidentes) valida que os polos de atração também geram fluxo inverso relevante nos trechos limítrofes.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)

@@ -21,7 +21,8 @@ from graficos import (
  
     #Parte 3
     criar_kpis_ato3,
-    criar_fig_acidentes_por_hora
+    criar_fig_acidentes_por_hora,
+    renderizar_secao_sentido_via
 )
 
 # 1. Configuração inicial da página
@@ -78,3 +79,6 @@ elif pagina == "Ato 3: Análise Temporal e Solução":
     
     fig_hora = criar_fig_acidentes_por_hora(df)
     st.plotly_chart(fig_hora, use_container_width=True)
+
+    # 3. Chamada da Seção de Sentido da Via (Barras Bipolares + Card Explicativo em 2 Colunas)
+    renderizar_secao_sentido_via(df)
