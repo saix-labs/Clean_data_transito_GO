@@ -1,6 +1,8 @@
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+import plotly.graph_objects as go
+
 
 
 def criar_kpis_ato1(df):
@@ -888,9 +890,7 @@ def criar_kpis_ato3(df):
 
 
 
-import pandas as pd
-import plotly.graph_objects as go
-import streamlit as st
+
 
 def criar_fig_acidentes_por_hora(df):
     """
@@ -934,7 +934,7 @@ def criar_fig_acidentes_por_hora(df):
 
     # 5. Estilização alinhada com o visual escuro/transparente
     fig.update_layout(
-        margin=dict(t=30, b=30, l=20, r=20),
+        margin=dict(t=20, b=30, l=20, r=10), 
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         font=dict(color='white', size=12),
@@ -944,7 +944,8 @@ def criar_fig_acidentes_por_hora(df):
             showgrid=False,
             zeroline=False,
             tickangle=0,
-            tickfont=dict(color='#A0AEC0')
+            tickfont=dict(color='#A0AEC0'),
+            range=[-0.2, len(df_completo['Hora_Label']) - 0.8] # Estica o gráfico até as pontas
         ),
         yaxis=dict(
             title=dict(text="Quantidade de Acidentes", font=dict(color='#A0AEC0')),
