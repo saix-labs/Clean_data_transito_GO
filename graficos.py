@@ -669,7 +669,6 @@ def renderizar_infografico_dias(df):
         """, unsafe_allow_html=True)
 
     # Botão de scroll compacto logo abaixo
-    st.markdown("<div id='grafico-barras-dias'></div>", unsafe_allow_html=True)
     st.markdown("""
         <div class="btn-scroll-container">
             <a href="#grafico-barras-dias" style="text-decoration: none;">
@@ -680,18 +679,20 @@ def renderizar_infografico_dias(df):
         </div>
     """, unsafe_allow_html=True)
 
+    
+    #ESPAÇADOR ENTRE OS DOIS GRAFICOS
+    st.markdown('<div style="height: 200px; display: block; clear: both;"></div>', unsafe_allow_html=True)
 
 
-
-import plotly.express as px
-import pandas as pd
-import streamlit as st
 
 def criar_fig_top2_causa_dia(df):
     """
     Processa os dados do Top 2 causas de acidentes por dia da semana
     e renderiza o gráfico (75%) com o painel de legenda lateral (25%).
     """
+    # ÂNCORA DO SCROLL: scroll-margin-top dá o "respiro" no topo para centralizar
+    st.markdown("<div id='grafico-barras-dias' style='scroll-margin-top: 100px;'></div>", unsafe_allow_html=True)
+
     # 1. Agrupa por dia da semana e causa para contar as ocorrências
     df_agrupado = df.groupby(['dia_semana', 'causa_acidente']).size().reset_index(name='Total')
     
