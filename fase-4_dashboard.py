@@ -9,14 +9,18 @@ from graficos import (
     criar_fig_mapa,
     criar_kpis_ato1,
 
-    #ato 2
+    #Parte 2
     criar_kpis_ato2,
     criar_fig_tracado,
     criar_fig_classificacao,
     criar_fig_causa_funnel,
     criar_fig_tipo_treemap,
     renderizar_infografico_dias,
-    criar_fig_top2_causa_dia
+    criar_fig_top2_causa_dia,
+
+ 
+    #Parte 3
+    criar_kpis_ato3
 )
 
 # 1. Configuração inicial da página
@@ -62,5 +66,8 @@ if pagina == "Ato 1: Panorama Geral":
 elif pagina == "Ato 2: Investigação e Hotspots":
     criar_kpis_ato2(df)
     renderizar_infografico_dias(df)
-    
     criar_fig_top2_causa_dia(df)
+
+elif pagina == "Ato 3: Análise Temporal e Solução":
+    criar_kpis_ato3(df)
+    # (Chamadas dos gráficos ou textos do Ato 3 entram aqui)

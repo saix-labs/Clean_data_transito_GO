@@ -767,3 +767,90 @@ def criar_fig_top2_causa_dia(df):
                 </p>
             </div>
         """, unsafe_allow_html=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def criar_kpis_ato3(df):
+    st.title("Ato 3: Proposta de Intervenção e Fechamento")
+    st.markdown("---")
+
+    # CSS do Ato 3 para alinhar o espaçamento
+    st.markdown(
+        """
+        <style>
+            div[data-testid="stHorizontalBlock"] {
+                margin-bottom: 2rem !important;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    total = len(df)
+    if total == 0:
+        st.warning("Nenhum dado disponível.")
+        return
+
+    # --- CALCULOS DOS 3 KPIS ---
+
+    # KPI 1: Janela Crítica (16h às 20h)
+    # Extrai as horas da coluna 'horario' (ex: '19:00:00' -> 19)
+    df_temp = df.copy()
+    horas = pd.to_datetime(df_temp['horario'].astype(str), format='%H:%M:%S', errors='coerce').dt.hour
+    
+    # Filtra entre 16h e 20h (inclusive)
+    acidentes_pico = horas.between(16, 20).sum()
+    pct_janela_critica = (acidentes_pico / total) * 100
+
+    # KPI 2: Sentido Crescente
+    qtd_crescente = (df['sentido_via'].astype(str).str.strip().str.lower() == 'crescente').sum()
+    pct_crescente = (qtd_crescente / total) * 100
+
+    # KPI 3: Hotspots na BR Líder (BR-153)
+    br_series = df['br'].astype(str).str.extract(r'(\d+)')[0] # Extrai número da BR
+    br_top1 = br_series.mode()[0] if not br_series.empty else "153"
+    
+    # Filtra os KMs únicos da BR mais crítica
+    df_br_top = df[br_series == br_top1]
+    kms_criticos = df_br_top['km'].nunique()
+
+    # --- RENDERIZAÇÃO DOS 3 CARDS ---
+    kpi1, kpi2, kpi3 = st.columns(3)
+
+    with kpi1:
+        st.metric(
+            label="Janela Crítica (16h - 20h)", 
+            value=f"{pct_janela_critica:.1f}%"
+        )
+
+    with kpi2:
+        st.metric(
+            label="Fluxo Sentido Crescente", 
+            value=f"{pct_crescente:.1f}%"
+        )
+
+    with kpi3:
+        st.metric(
+            label=f"Hotspots KMs (BR-{br_top1})", 
+            value=f"{kms_criticos} Trechos"
+        )
+
+    st.markdown("---")

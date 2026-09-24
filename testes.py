@@ -19,3 +19,15 @@ df.info()
 #%%
 df['tipo_pista'].value_counts()
 # %%
+
+
+#ver a linha da coluna
+#%%
+df['tipo_acidente'].value_counts()
+# %%
+
+
+#analisar linha da coluna
+#%%
+df['causa_acidente'].value_counts()
+# %%
