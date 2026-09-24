@@ -719,8 +719,8 @@ def criar_fig_top2_causa_dia(df):
         text='Total',
         custom_data=['causa_acidente'],
         color_discrete_map={
-            'Causa #1': '#00F3FF',
-            'Causa #2': '#0077B6'
+            'Causa #1': 'rgba(0, 243, 255, 0.75)',
+            'Causa #2': 'rgba(0, 119, 182, 0.85)'
         }
     )
     
@@ -754,15 +754,15 @@ def criar_fig_top2_causa_dia(df):
     with col_legenda:
         st.markdown("""
             <div style="background: rgba(10, 25, 47, 0.6); padding: 15px; border-radius: 8px; border: 1px solid rgba(0, 243, 255, 0.3); margin-top: 25px;">
-                <h5 style="color: #00F3FF; margin-top: 0; font-size: 14px;">Legenda das Causas</h5>
-                <p style="font-size: 12px; color: #FFFFFF; margin-bottom: 8px;">
+                <h5 style="color: #00F3FF; margin-top: 0; font-size: 17px;">Legenda das Causas</h5>
+                <p style="font-size: 16px; color: #FFFFFF; margin-bottom: 8px;">
                     <b style="color: #00F3FF;">■ Causa #1:</b> Principal causador do dia.
                 </p>
-                <p style="font-size: 12px; color: #FFFFFF; margin-bottom: 8px;">
+                <p style="font-size: 14px; color: #FFFFFF; margin-bottom: 8px;">
                     <b style="color: #0077B6;">■ Causa #2:</b> Segunda maior ocorrência no mesmo dia.
                 </p>
                 <hr style="border: 0.5px solid rgba(0, 243, 255, 0.2); margin: 10px 0;">
-                <p style="font-size: 11px; color: #A0AEC0; margin: 0;">
+                <p style="font-size: 14px; color: #A0AEC0; margin: 0;">
                     Passe o mouse sobre as barras para ver a causa exata em cada dia.
                 </p>
             </div>
