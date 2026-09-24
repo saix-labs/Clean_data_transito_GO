@@ -515,7 +515,7 @@ def criar_fig_tipo_treemap(df):
 
 
 
-import streamlit as st
+
 
 def obter_dados_causa_dia(df, dia_semana_str):
     """Calcula total, causa #1 e % para o dia selecionado (em minúsculo)."""
@@ -882,3 +882,74 @@ def criar_kpis_ato3(df):
         )
 
     st.markdown("---")
+
+
+
+import pandas as pd
+import plotly.graph_objects as go
+import streamlit as st
+
+def criar_fig_acidentes_por_hora(df):
+    """
+    Cria um gráfico de linha com marcadores para acidentes das 0h às 23h,
+    agrupando os minutos na hora cheia e ocupando a largura total da tela.
+    """
+    # 1. Garante a extração da hora (independente se veio como string '14:30' ou datetime)
+    df_temp = df.copy()
+    
+    if pd.api.types.is_string_dtype(df_temp['horario']):
+        # Extrai os dois primeiros dígitos antes dos dois pontos (ex: '14:30' -> 14)
+        horas_extraidas = df_temp['horario'].str.split(':').str[0].astype(int)
+    else:
+        # Caso já seja datetime/time do pandas
+        horas_extraidas = pd.to_datetime(df_temp['horario'], format='%H:%M:%S', errors='coerce').dt.hour
+    
+    # 2. Contagem por hora
+    contagem_horas = horas_extraidas.value_counts().reset_index()
+    contagem_horas.columns = ['Hora', 'Total']
+    
+    # 3. Garante que todas as 24 horas (0 a 23) existam na tabela, mesmo com 0 acidentes
+    df_24h = pd.DataFrame({'Hora': list(range(24))})
+    df_completo = pd.merge(df_24h, contagem_horas, on='Hora', how='left').fillna(0)
+    df_completo['Total'] = df_completo['Total'].astype(int)
+    df_completo['Hora_Label'] = df_completo['Hora'].apply(lambda x: f"{x:02d}:00h")
+
+    # 4. Construção do Gráfico com Plotly Graph Objects
+    fig = go.Figure()
+
+    fig.add_trace(
+        go.Scatter(
+            x=df_completo['Hora_Label'],
+            y=df_completo['Total'],
+            mode='lines+markers',
+            name='Acidentes',
+            line=dict(color='#00F3FF', width=3),               # Linha Cyan Neon
+            marker=dict(size=8, color='#08519c', line=dict(color='#00F3FF', width=2)), # Ponto com borda neon
+            hovertemplate='<b>%{x}</b><br>Total: <b>%{y} acidentes</b><extra></extra>'
+        )
+    )
+
+    # 5. Estilização alinhada com o visual escuro/transparente
+    fig.update_layout(
+        margin=dict(t=30, b=30, l=20, r=20),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='white', size=12),
+        hoverlabel=dict(bgcolor='#111827', font_color='#FFFFFF', font_size=13),
+        xaxis=dict(
+            title=dict(text="Horário do Dia", font=dict(color='#A0AEC0')),
+            showgrid=False,
+            zeroline=False,
+            tickangle=0,
+            tickfont=dict(color='#A0AEC0')
+        ),
+        yaxis=dict(
+            title=dict(text="Quantidade de Acidentes", font=dict(color='#A0AEC0')),
+            showgrid=True,
+            gridcolor='rgba(255, 255, 255, 0.08)', # Linhas de grade bem discretas
+            zeroline=False,
+            tickfont=dict(color='#A0AEC0')
+        )
+    )
+
+    return fig

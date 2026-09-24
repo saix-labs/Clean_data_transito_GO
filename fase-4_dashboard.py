@@ -20,7 +20,8 @@ from graficos import (
 
  
     #Parte 3
-    criar_kpis_ato3
+    criar_kpis_ato3,
+    criar_fig_acidentes_por_hora
 )
 
 # 1. Configuração inicial da página
@@ -69,5 +70,11 @@ elif pagina == "Ato 2: Investigação e Hotspots":
     criar_fig_top2_causa_dia(df)
 
 elif pagina == "Ato 3: Análise Temporal e Solução":
+    # 1. Renderiza os cartões de KPIs
     criar_kpis_ato3(df)
-    # (Chamadas dos gráficos ou textos do Ato 3 entram aqui)
+    
+    # 2. Título e chamada do Gráfico de Acidentes por Hora (Largura Total)
+    st.subheader("Distribuição do Volume de Acidentes por Hora do Dia")
+    
+    fig_hora = criar_fig_acidentes_por_hora(df)
+    st.plotly_chart(fig_hora, use_container_width=True)
