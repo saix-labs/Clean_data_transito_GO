@@ -728,7 +728,7 @@ def criar_fig_top2_causa_dia(df):
     fig.update_traces(
         textposition='outside',
         texttemplate='%{text:,}',
-        textfont=dict(color='#FFFFFF', size=11),
+        textfont=dict(color='#FFFFFF', size=13),
         hovertemplate='<b>%{x}</b><br><b>%{data.name}:</b> %{customdata[0]}<br>Total: %{y:,}<extra></extra>'
     )
     
