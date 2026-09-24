@@ -883,6 +883,9 @@ def criar_kpis_ato3(df):
 
     st.markdown("---")
 
+    # Espaçador idêntico ao respiro vertical da Página 2
+    st.markdown('<div style="margin-top: 1.5rem;"></div>', unsafe_allow_html=True)
+
 
 
 import pandas as pd
