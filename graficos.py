@@ -832,6 +832,34 @@ def criar_kpis_ato3(df):
     df_br_top = df[br_series == br_top1]
     kms_criticos = df_br_top['km'].nunique()
 
+    # CSS cirúrgico para forçar largura 100% e alinhamento central em todos os sub-elementos da métrica
+    st.markdown("""
+        <style>
+            [data-testid="stMetric"] {
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
+                text-align: center !important;
+                width: 100% !important;
+            }
+            [data-testid="stMetricLabel"], 
+            [data-testid="stMetricValue"], 
+            [data-testid="stMetricDelta"] {
+                width: 100% !important;
+                display: flex !important;
+                justify-content: center !important;
+                text-align: center !important;
+            }
+            /* Garante que o texto dentro das divs filhas também fique centralizado */
+            [data-testid="stMetricLabel"] > div, 
+            [data-testid="stMetricValue"] > div {
+                width: 100% !important;
+                text-align: center !important;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+
     # --- RENDERIZAÇÃO DOS 3 CARDS ---
     kpi1, kpi2, kpi3 = st.columns(3)
 
