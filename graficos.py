@@ -679,3 +679,90 @@ def renderizar_infografico_dias(df):
             </a>
         </div>
     """, unsafe_allow_html=True)
+
+
+
+
+import plotly.express as px
+import pandas as pd
+import streamlit as st
+
+def criar_fig_top2_causa_dia(df):
+    """
+    Processa os dados do Top 2 causas de acidentes por dia da semana
+    e renderiza o gráfico (75%) com o painel de legenda lateral (25%).
+    """
+    # 1. Agrupa por dia da semana e causa para contar as ocorrências
+    df_agrupado = df.groupby(['dia_semana', 'causa_acidente']).size().reset_index(name='Total')
+    
+    # 2. Ordena e pega o Top 2 causas de cada dia da semana
+    df_top2_dia = df_agrupado.sort_values(['dia_semana', 'Total'], ascending=[True, False])
+    df_top2_dia = df_top2_dia.groupby('dia_semana').head(2).copy()
+    
+    # Adiciona identificador de Posição ('Causa #1' ou 'Causa #2')
+    df_top2_dia['Posicao'] = df_top2_dia.groupby('dia_semana').cumcount() + 1
+    df_top2_dia['Posicao'] = df_top2_dia['Posicao'].apply(lambda x: f'Causa #{x}')
+    
+    # Ordena os dias da semana cronologicamente
+    ordem_dias = ['segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado', 'domingo']
+    df_top2_dia['dia_semana'] = pd.Categorical(df_top2_dia['dia_semana'], categories=ordem_dias, ordered=True)
+    df_top2_dia = df_top2_dia.sort_values('dia_semana')
+
+    # 3. Criação do gráfico agrupado no Plotly
+    fig = px.bar(
+        df_top2_dia,
+        x='dia_semana',
+        y='Total',
+        color='Posicao',
+        barmode='group',
+        text='Total',
+        custom_data=['causa_acidente'],
+        color_discrete_map={
+            'Causa #1': '#00F3FF',
+            'Causa #2': '#0077B6'
+        }
+    )
+    
+    # Configuração dos rótulos diretos e tooltip
+    fig.update_traces(
+        textposition='outside',
+        texttemplate='%{text:,}',
+        textfont=dict(color='#FFFFFF', size=11),
+        hovertemplate='<b>%{x}</b><br><b>%{data.name}:</b> %{customdata[0]}<br>Total: %{y:,}<extra></extra>'
+    )
+    
+    # Estilização do Layout
+    fig.update_layout(
+        xaxis_title=None,
+        yaxis_title=None,
+        showlegend=False, # Oculta a legenda interna do Plotly pois já usamos a lateral
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='white'),
+        margin=dict(t=30, b=20, l=10, r=10),
+        xaxis=dict(tickfont=dict(color='#FFFFFF', size=12)),
+        yaxis=dict(showticklabels=False)
+    )
+    
+    # 4. Renderização no Streamlit (Divisão 75% / 25%)
+    col_grafico, col_legenda = st.columns([2, 1])
+    
+    with col_grafico:
+        st.plotly_chart(fig, use_container_width=True)
+        
+    with col_legenda:
+        st.markdown("""
+            <div style="background: rgba(10, 25, 47, 0.6); padding: 15px; border-radius: 8px; border: 1px solid rgba(0, 243, 255, 0.3); margin-top: 25px;">
+                <h5 style="color: #00F3FF; margin-top: 0; font-size: 14px;">Legenda das Causas</h5>
+                <p style="font-size: 12px; color: #FFFFFF; margin-bottom: 8px;">
+                    <b style="color: #00F3FF;">■ Causa #1:</b> Principal causador do dia.
+                </p>
+                <p style="font-size: 12px; color: #FFFFFF; margin-bottom: 8px;">
+                    <b style="color: #0077B6;">■ Causa #2:</b> Segunda maior ocorrência no mesmo dia.
+                </p>
+                <hr style="border: 0.5px solid rgba(0, 243, 255, 0.2); margin: 10px 0;">
+                <p style="font-size: 11px; color: #A0AEC0; margin: 0;">
+                    Passe o mouse sobre as barras para ver a causa exata em cada dia.
+                </p>
+            </div>
+        """, unsafe_allow_html=True)
