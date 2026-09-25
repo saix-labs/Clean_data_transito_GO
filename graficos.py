@@ -1067,3 +1067,272 @@ def renderizar_secao_sentido_via(df):
             </p>
         </div>
         """, unsafe_allow_html=True)
+
+
+
+import numpy as np
+import pandas as pd
+import plotly.express as px
+import streamlit as st
+
+
+def renderizar_secao_mapa_hotspots_interativo(df):
+  """Renderiza o Mapa Interativo de Hotspots em fatias de 10km (80% da tela)
+
+  e o Painel Lateral de Controle/Card Informativo (20% da tela).
+  """
+  # Style customizado para os seletores: fundo escuro contrastante, texto branco bem legível
+  st.markdown(
+      """
+        <style>
+            div[data-testid="stRadio"] > label {
+                display: none !important;
+            }
+            div[data-testid="stRadio"] div[role="radiogroup"] {
+                gap: 10px !important;
+                width: 100% !important;
+            }
+            div[data-testid="stRadio"] div[role="radiogroup"] label {
+                background-color: #1E293B !important;
+                border: 1px solid #475569 !important;
+                border-radius: 8px !important;
+                padding: 12px 14px !important;
+                color: #FFFFFF !important;
+                font-weight: 600 !important;
+                font-size: 13px !important;
+                text-align: center !important;
+                width: 100% !important;
+                transition: all 0.2s ease !important;
+                cursor: pointer !important;
+            }
+            div[data-testid="stRadio"] div[role="radiogroup"] label:hover {
+                background-color: #334155 !important;
+                border-color: #94A3B8 !important;
+            }
+            div[data-testid="stRadio"] div[role="radiogroup"] label[data-checked="true"] {
+                background-color: #2563EB !important;
+                border-color: #3B82F6 !important;
+                color: #FFFFFF !important;
+                font-weight: bold !important;
+            }
+            div[data-testid="stRadio"] div[role="radiogroup"] label > div:first-child {
+                display: none !important;
+            }
+        </style>
+    """,
+      unsafe_allow_html=True,
+  )
+
+  # 1. Tratamento do horário do DataFrame
+  df_temp = df.copy()
+  if 'horario' in df_temp.columns:
+    if pd.api.types.is_string_dtype(df_temp['horario']):
+      df_temp['hora_int'] = pd.to_numeric(
+          df_temp['horario'].str.split(':').str[0], errors='coerce'
+      ).fillna(0)
+    else:
+      df_temp['hora_int'] = pd.to_datetime(
+          df_temp['horario'].astype(str), format='%H:%M:%S', errors='coerce'
+      ).dt.hour.fillna(0)
+  else:
+    df_temp['hora_int'] = 0
+
+  # 2. Layout da tela: 80% Mapa (4 partes) vs 20% Controles (1 parte)
+  col_mapa, col_controle = st.columns([4, 1])
+
+  # 3. Lógica do Filtro Lateral e Atualização dos Dados
+  with col_controle:
+    st.markdown(
+        "<p style='color: #FFFFFF; font-size: 13px; margin-bottom: 8px;"
+        " font-weight: bold;'>JANELA DE ANÁLISE</p>",
+        unsafe_allow_html=True,
+    )
+
+    opcao_filtro = st.radio(
+        label='Selecione a Janela:',
+        options=['Visão Geral (24 Horas)', 'Janela Crítica (16h-20h)'],
+        index=0,
+        key='filtro_mapa_ato3',
+    )
+
+    is_pendular = opcao_filtro == 'Janela Crítica (16h-20h)'
+
+    if is_pendular:
+      df_filtrado = df_temp[df_temp['hora_int'].between(16, 20)]
+    else:
+      df_filtrado = df_temp
+
+  # 4. Agrupamento em Trechos de 10 km
+  if not df_filtrado.empty and 'km' in df_filtrado.columns:
+    df_filtrado['km_num'] = pd.to_numeric(df_filtrado['km'], errors='coerce')
+    df_valid = df_filtrado.dropna(
+        subset=['km_num', 'latitude', 'longitude']
+    ).copy()
+
+    # Criação do raio de 10 km
+    df_valid['trecho_10km'] = (df_valid['km_num'] // 10) * 10
+
+    # Lógica de cálculo por trecho de 10 km
+    def calcular_percentual_sentido(sub_df):
+      # Filtra 'Não Informado'
+      sentidos = sub_df[
+          sub_df['sentido_via'].astype(str).str.lower() != 'não informado'
+      ]['sentido_via']
+      total = len(sentidos)
+      if total == 0:
+        return 'N/I'
+      cres = (sentidos == 'Crescente').sum()
+      pct_cres = (cres / total) * 100
+      pct_dec = 100 - pct_cres
+      return f'{pct_cres:.0f}% Cres | {pct_dec:.0f}% Dec'
+
+    # Agrupando por BR e Trecho de 10 km
+    agrupados = []
+    for (br_val, trecho_val), g in df_valid.groupby(['br', 'trecho_10km']):
+      total_ac = len(g)
+      lat_m = g['latitude'].mean()
+      lon_m = g['longitude'].mean()
+      pct_sentido_trecho = calcular_percentual_sentido(g)
+
+      agrupados.append({
+          'br': str(br_val).split('.')[0],
+          'trecho_10km': trecho_val,
+          'rotulo_trecho': f'KM {int(trecho_val)} - {int(trecho_val)+10}',
+          'latitude': lat_m,
+          'longitude': lon_m,
+          'total_acidentes': total_ac,
+          'pct_sentido_trecho': pct_sentido_trecho,
+      })
+
+    df_mapa = pd.DataFrame(agrupados)
+  else:
+    df_mapa = pd.DataFrame()
+
+  # 5. Renderização do Card Explicativo Pendular no Painel Lateral
+  with col_controle:
+    if is_pendular and not df_filtrado.empty:
+      # Causa #1 Global
+      causa_top1 = (
+          df_filtrado['causa_acidente'].mode().iloc[0]
+          if 'causa_acidente' in df_filtrado.columns
+          and not df_filtrado['causa_acidente'].empty
+          else 'N/A'
+      )
+
+      # Tipo #1 Global
+      tipo_top1 = (
+          df_filtrado['tipo_acidente'].mode().iloc[0]
+          if 'tipo_acidente' in df_filtrado.columns
+          and not df_filtrado['tipo_acidente'].empty
+          else 'N/A'
+      )
+
+      # Sentido % Global
+      sentidos_validos = df_filtrado[
+          df_filtrado['sentido_via'].astype(str).str.lower() != 'não informado'
+      ]['sentido_via']
+      total_sent = len(sentidos_validos)
+      if total_sent > 0:
+        p_cres = (sentidos_validos == 'Crescente').sum() / total_sent * 100
+        p_dec = 100 - p_cres
+        str_sentido = f'{p_cres:.1f}% Crescente | {p_dec:.1f}% Decrescente'
+      else:
+        str_sentido = 'N/A'
+
+      st.markdown(
+          f"""
+                <div style="background-color: #0F172A; border: 1px solid #334155; padding: 14px; border-radius: 8px; margin-top: 15px;">
+                    <p style="color: #94A3B8; font-size: 11px; margin-bottom: 4px; font-weight: bold; text-transform: uppercase;">RESUMO DAS 16H ÀS 20H</p>
+                    
+                    <p style="color: #64748B; font-size: 10px; margin: 6px 0 2px 0;">CAUSA #1</p>
+                    <p style="color: #FFFFFF; font-size: 12px; font-weight: 600; margin: 0;">{causa_top1}</p>
+                    
+                    <p style="color: #64748B; font-size: 10px; margin: 8px 0 2px 0;">TIPO DE ACIDENTE #1</p>
+                    <p style="color: #FFFFFF; font-size: 12px; font-weight: 600; margin: 0;">{tipo_top1}</p>
+                    
+                    <p style="color: #64748B; font-size: 10px; margin: 8px 0 2px 0;">DIVISÃO DOS SENTIDOS</p>
+                    <p style="color: #38BDF8; font-size: 12px; font-weight: bold; margin: 0;">{str_sentido}</p>
+                </div>
+            """,
+          unsafe_allow_html=True,
+      )
+
+  # 6. Renderização do Mapa na Coluna Principal
+  with col_mapa:
+    st.subheader('Mapeamento Geográfico de Hotspots das BRs')
+
+    if not df_mapa.empty:
+      if is_pendular:
+        # Hover no Pendular inclui a % do sentido do trecho
+        fig_mapa = px.scatter_mapbox(
+            df_mapa,
+            lat='latitude',
+            lon='longitude',
+            size='total_acidentes',
+            color='total_acidentes',
+            color_continuous_scale='Reds',
+            size_max=28,
+            zoom=6.5,
+            center=dict(lat=-16.6869, lon=-49.2648),
+            height=550,
+            hover_name='rotulo_trecho',
+            hover_data={
+                'br': True,
+                'total_acidentes': True,
+                'pct_sentido_trecho': True,
+                'latitude': False,
+                'longitude': False,
+            },
+            mapbox_style='open-street-map',
+        )
+        fig_mapa.update_traces(
+            hovertemplate=(
+                '<b>BR-%{customdata[0]} | %{hovertext}</b><br><br>'
+                'Total de Acidentes: <b>%{customdata[1]}</b><br>'
+                'Sentido da Via: <b>%{customdata[2]}</b><extra></extra>'
+            )
+        )
+      else:
+        # Hover Geral mostra apenas BR, Trecho e Total
+        fig_mapa = px.scatter_mapbox(
+            df_mapa,
+            lat='latitude',
+            lon='longitude',
+            size='total_acidentes',
+            color='total_acidentes',
+            color_continuous_scale='Reds',
+            size_max=28,
+            zoom=6.5,
+            center=dict(lat=-16.6869, lon=-49.2648),
+            height=550,
+            hover_name='rotulo_trecho',
+            hover_data={
+                'br': True,
+                'total_acidentes': True,
+                'latitude': False,
+                'longitude': False,
+            },
+            mapbox_style='open-street-map',
+        )
+        fig_mapa.update_traces(
+            hovertemplate=(
+                '<b>BR-%{customdata[0]} | %{hovertext}</b><br><br>'
+                'Total de Acidentes: <b>%{customdata[1]}</b><extra></extra>'
+            )
+        )
+
+      fig_mapa.update_layout(
+          margin=dict(l=0, r=0, t=0, b=0),
+          paper_bgcolor='rgba(0,0,0,0)',
+          plot_bgcolor='rgba(0,0,0,0)',
+          coloraxis_showscale=False,
+      )
+
+      st.plotly_chart(
+          fig_mapa, use_container_width=True, key='mapa_hotspots_ato3'
+      )
+    else:
+      st.warning(
+          'Nenhum dado encontrado para os filtros selecionados ou falta de'
+          ' coordenadas/KM.'
+      )

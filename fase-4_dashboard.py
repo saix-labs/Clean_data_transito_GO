@@ -22,7 +22,8 @@ from graficos import (
     #Parte 3
     criar_kpis_ato3,
     criar_fig_acidentes_por_hora,
-    renderizar_secao_sentido_via
+    renderizar_secao_sentido_via,
+    renderizar_secao_mapa_hotspots_interativo
 )
 
 # 1. Configuração inicial da página
@@ -82,3 +83,6 @@ elif pagina == "Ato 3: Análise Temporal e Solução":
 
     # 3. Chamada da Seção de Sentido da Via (Barras Bipolares + Card Explicativo em 2 Colunas)
     renderizar_secao_sentido_via(df)
+
+    # 4. Chamada do Mapa Interativo de Hotspots (Agrupamentos de 10km + Filtro Pendular e Cards)
+    renderizar_secao_mapa_hotspots_interativo(df)
