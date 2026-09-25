@@ -1208,22 +1208,22 @@ def renderizar_secao_mapa_hotspots_interativo(df):
   else:
     df_mapa = pd.DataFrame()
 
-  # 5. Renderização do Card Explicativo Pendular no Painel Lateral
+    # 5. Renderização do Card Explicativo Pendular no Painel Lateral
   with col_controle:
     if is_pendular and not df_filtrado.empty:
       # Causa #1 Global
       causa_top1 = (
-          df_filtrado['causa_acidente'].mode().iloc[0]
+          str(df_filtrado['causa_acidente'].mode().iloc[0]).title()
           if 'causa_acidente' in df_filtrado.columns
-          and not df_filtrado['causa_acidente'].empty
+          and not df_filtrado['causa_acidente'].dropna().empty
           else 'N/A'
       )
 
       # Tipo #1 Global
       tipo_top1 = (
-          df_filtrado['tipo_acidente'].mode().iloc[0]
+          str(df_filtrado['tipo_acidente'].mode().iloc[0]).title()
           if 'tipo_acidente' in df_filtrado.columns
-          and not df_filtrado['tipo_acidente'].empty
+          and not df_filtrado['tipo_acidente'].dropna().empty
           else 'N/A'
       )
 
@@ -1240,20 +1240,15 @@ def renderizar_secao_mapa_hotspots_interativo(df):
         str_sentido = 'N/A'
 
       st.markdown(
-          f"""
-                <div style="background-color: #0F172A; border: 1px solid #334155; padding: 14px; border-radius: 8px; margin-top: 15px;">
-                    <p style="color: #94A3B8; font-size: 11px; margin-bottom: 4px; font-weight: bold; text-transform: uppercase;">RESUMO DAS 16H ÀS 20H</p>
-                    
-                    <p style="color: #64748B; font-size: 10px; margin: 6px 0 2px 0;">CAUSA #1</p>
-                    <p style="color: #FFFFFF; font-size: 12px; font-weight: 600; margin: 0;">{causa_top1}</p>
-                    
-                    <p style="color: #64748B; font-size: 10px; margin: 8px 0 2px 0;">TIPO DE ACIDENTE #1</p>
-                    <p style="color: #FFFFFF; font-size: 12px; font-weight: 600; margin: 0;">{tipo_top1}</p>
-                    
-                    <p style="color: #64748B; font-size: 10px; margin: 8px 0 2px 0;">DIVISÃO DOS SENTIDOS</p>
-                    <p style="color: #38BDF8; font-size: 12px; font-weight: bold; margin: 0;">{str_sentido}</p>
-                </div>
-            """,
+          f'<div style="background-color: #0F172A; border: 1px solid #334155; padding: 14px; border-radius: 8px; margin-top: 15px;">'
+          f'<p style="color: #94A3B8; font-size: 11px; margin-bottom: 4px; font-weight: bold; text-transform: uppercase;">RESUMO DAS 16H ÀS 20H</p>'
+          f'<p style="color: #64748B; font-size: 10px; margin: 6px 0 2px 0;">CAUSA #1</p>'
+          f'<p style="color: #FFFFFF; font-size: 12px; font-weight: 600; margin: 0;">{causa_top1}</p>'
+          f'<p style="color: #64748B; font-size: 10px; margin: 8px 0 2px 0;">TIPO DE ACIDENTE #1</p>'
+          f'<p style="color: #FFFFFF; font-size: 12px; font-weight: 600; margin: 0;">{tipo_top1}</p>'
+          f'<p style="color: #64748B; font-size: 10px; margin: 8px 0 2px 0;">DIVISÃO DOS SENTIDOS</p>'
+          f'<p style="color: #38BDF8; font-size: 12px; font-weight: bold; margin: 0;">{str_sentido}</p>'
+          f'</div>',
           unsafe_allow_html=True,
       )
 
