@@ -1081,7 +1081,7 @@ def renderizar_secao_mapa_hotspots_interativo(df):
 
   e o Painel Lateral de Controle/Card Informativo (20% da tela).
   """
-  # Style customizado para os seletores: fundo escuro contrastante, texto branco bem legível
+  # CSS customizado para os botões do st.radio: vazados/transparentes com borda destacada
   st.markdown(
       """
         <style>
@@ -1093,8 +1093,8 @@ def renderizar_secao_mapa_hotspots_interativo(df):
                 width: 100% !important;
             }
             div[data-testid="stRadio"] div[role="radiogroup"] label {
-                background-color: #1E293B !important;
-                border: 1px solid #475569 !important;
+                background: transparent !important;
+                border: 1.5px solid #334155 !important;
                 border-radius: 8px !important;
                 padding: 12px 14px !important;
                 color: #FFFFFF !important;
@@ -1102,17 +1102,26 @@ def renderizar_secao_mapa_hotspots_interativo(df):
                 font-size: 13px !important;
                 text-align: center !important;
                 width: 100% !important;
-                transition: all 0.2s ease !important;
+                transition: all 0.2s ease-in-out !important;
                 cursor: pointer !important;
             }
-            div[data-testid="stRadio"] div[role="radiogroup"] label:hover {
-                background-color: #334155 !important;
-                border-color: #94A3B8 !important;
-            }
-            div[data-testid="stRadio"] div[role="radiogroup"] label[data-checked="true"] {
-                background-color: #2563EB !important;
-                border-color: #3B82F6 !important;
+            div[data-testid="stRadio"] div[role="radiogroup"] label p,
+            div[data-testid="stRadio"] div[role="radiogroup"] label span {
                 color: #FFFFFF !important;
+            }
+            div[data-testid="stRadio"] div[role="radiogroup"] label:hover {
+                border-color: #38BDF8 !important;
+                box-shadow: 0px 0px 8px rgba(56, 189, 248, 0.3) !important;
+            }
+            div[data-testid="stRadio"] div[role="radiogroup"] label[data-checked="true"],
+            div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) {
+                background: rgba(56, 189, 248, 0.1) !important;
+                border-color: #38BDF8 !important;
+                box-shadow: 0px 0px 10px rgba(56, 189, 248, 0.4) !important;
+            }
+            div[data-testid="stRadio"] div[role="radiogroup"] label[data-checked="true"] p,
+            div[data-testid="stRadio"] div[role="radiogroup"] label[data-checked="true"] span {
+                color: #38BDF8 !important;
                 font-weight: bold !important;
             }
             div[data-testid="stRadio"] div[role="radiogroup"] label > div:first-child {
@@ -1143,8 +1152,8 @@ def renderizar_secao_mapa_hotspots_interativo(df):
   # 3. Lógica do Filtro Lateral e Atualização dos Dados
   with col_controle:
     st.markdown(
-        "<p style='color: #FFFFFF; font-size: 13px; margin-bottom: 8px;"
-        " font-weight: bold;'>JANELA DE ANÁLISE</p>",
+        "<p style='color: #FFFFFF !important; font-size: 13px; margin-bottom:"
+        " 8px; font-weight: bold;'>JANELA DE ANÁLISE</p>",
         unsafe_allow_html=True,
     )
 
@@ -1169,40 +1178,40 @@ def renderizar_secao_mapa_hotspots_interativo(df):
         subset=['km_num', 'latitude', 'longitude']
     ).copy()
 
-    # Criação do raio de 10 km
-    df_valid['trecho_10km'] = (df_valid['km_num'] // 10) * 10
+    # Criação do trecho de 5 km
+    df_valid['trecho_5km'] = (df_valid['km_num'] // 5) * 5
 
-    # Lógica de cálculo por trecho de 10 km
+    # Lógica de cálculo por trecho de 5 km
     def calcular_percentual_sentido(sub_df):
-      # Filtra 'Não Informado'
-      sentidos = sub_df[
-          sub_df['sentido_via'].astype(str).str.lower() != 'não informado'
-      ]['sentido_via']
-      total = len(sentidos)
-      if total == 0:
-        return 'N/I'
-      cres = (sentidos == 'Crescente').sum()
-      pct_cres = (cres / total) * 100
-      pct_dec = 100 - pct_cres
-      return f'{pct_cres:.0f}% Cres | {pct_dec:.0f}% Dec'
+        # Filtra 'Não Informado'
+        sentidos = sub_df[
+            sub_df['sentido_via'].astype(str).str.lower() != 'não informado'
+        ]['sentido_via']
+        total = len(sentidos)
+        if total == 0:
+            return 'N/I'
+        cres = (sentidos.astype(str).str.lower() == 'crescente').sum()
+        pct_cres = (cres / total) * 100
+        pct_dec = 100 - pct_cres
+        return f'{pct_cres:.0f}% Crescente | {pct_dec:.0f}% Decrescente'
 
-    # Agrupando por BR e Trecho de 10 km
+    # Agrupando por BR e Trecho de 5 km
     agrupados = []
-    for (br_val, trecho_val), g in df_valid.groupby(['br', 'trecho_10km']):
-      total_ac = len(g)
-      lat_m = g['latitude'].mean()
-      lon_m = g['longitude'].mean()
-      pct_sentido_trecho = calcular_percentual_sentido(g)
+    for (br_val, trecho_val), g in df_valid.groupby(['br', 'trecho_5km']):
+        total_ac = len(g)
+        lat_m = g['latitude'].mean()
+        lon_m = g['longitude'].mean()
+        pct_sentido_trecho = calcular_percentual_sentido(g)
 
-      agrupados.append({
-          'br': str(br_val).split('.')[0],
-          'trecho_10km': trecho_val,
-          'rotulo_trecho': f'KM {int(trecho_val)} - {int(trecho_val)+10}',
-          'latitude': lat_m,
-          'longitude': lon_m,
-          'total_acidentes': total_ac,
-          'pct_sentido_trecho': pct_sentido_trecho,
-      })
+        agrupados.append({
+            'br': str(br_val).split('.')[0],
+            'trecho_5km': trecho_val,
+            'rotulo_trecho': f'KM {int(trecho_val)} - {int(trecho_val)+5}',
+            'latitude': lat_m,
+            'longitude': lon_m,
+            'total_acidentes': total_ac,
+            'pct_sentido_trecho': pct_sentido_trecho,
+        })
 
     df_mapa = pd.DataFrame(agrupados)
   else:
@@ -1240,14 +1249,14 @@ def renderizar_secao_mapa_hotspots_interativo(df):
         str_sentido = 'N/A'
 
       st.markdown(
-          f'<div style="background-color: #0F172A; border: 1px solid #334155; padding: 14px; border-radius: 8px; margin-top: 15px;">'
-          f'<p style="color: #94A3B8; font-size: 11px; margin-bottom: 4px; font-weight: bold; text-transform: uppercase;">RESUMO DAS 16H ÀS 20H</p>'
-          f'<p style="color: #64748B; font-size: 10px; margin: 6px 0 2px 0;">CAUSA #1</p>'
-          f'<p style="color: #FFFFFF; font-size: 12px; font-weight: 600; margin: 0;">{causa_top1}</p>'
-          f'<p style="color: #64748B; font-size: 10px; margin: 8px 0 2px 0;">TIPO DE ACIDENTE #1</p>'
-          f'<p style="color: #FFFFFF; font-size: 12px; font-weight: 600; margin: 0;">{tipo_top1}</p>'
-          f'<p style="color: #64748B; font-size: 10px; margin: 8px 0 2px 0;">DIVISÃO DOS SENTIDOS</p>'
-          f'<p style="color: #38BDF8; font-size: 12px; font-weight: bold; margin: 0;">{str_sentido}</p>'
+          f'<div style="background: transparent; border: 1.5px solid #38BDF8; padding: 14px; border-radius: 8px; margin-top: 15px; box-shadow: 0px 0px 8px rgba(56, 189, 248, 0.25);">'
+          f'<p style="color: #FFFFFF !important; font-size: 11px; margin-bottom: 6px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">RESUMO DAS 16H ÀS 20H</p>'
+          f'<p style="color: #94A3B8 !important; font-size: 10px; margin: 8px 0 2px 0; font-weight: 600;">CAUSA #1</p>'
+          f'<p style="color: #FFFFFF !important; font-size: 12px; font-weight: 600; margin: 0;">{causa_top1}</p>'
+          f'<p style="color: #94A3B8 !important; font-size: 10px; margin: 8px 0 2px 0; font-weight: 600;">TIPO DE ACIDENTE #1</p>'
+          f'<p style="color: #FFFFFF !important; font-size: 12px; font-weight: 600; margin: 0;">{tipo_top1}</p>'
+          f'<p style="color: #94A3B8 !important; font-size: 10px; margin: 8px 0 2px 0; font-weight: 600;">DIVISÃO DOS SENTIDOS</p>'
+          f'<p style="color: #38BDF8 !important; font-size: 12px; font-weight: bold; margin: 0;">{str_sentido}</p>'
           f'</div>',
           unsafe_allow_html=True,
       )
