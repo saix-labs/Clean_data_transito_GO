@@ -1115,13 +1115,16 @@ def renderizar_secao_mapa_hotspots_interativo(df):
     st.markdown(
         """
         <style>
+            /* Oculta o título/rótulo padrão do Streamlit acima do rádio */
             div[data-testid="stRadio"] > label {
                 display: none !important;
             }
+            /* Ajusta o espaçamento vertical entre os botões */
             div[data-testid="stRadio"] div[role="radiogroup"] {
                 gap: 10px !important;
                 width: 100% !important;
             }
+            /* Estiliza cada opção como um botão vazado (fundo transparente e borda) */
             div[data-testid="stRadio"] div[role="radiogroup"] label {
                 background: transparent !important;
                 border: 1.5px solid #334155 !important;
@@ -1129,31 +1132,36 @@ def renderizar_secao_mapa_hotspots_interativo(df):
                 padding: 12px 14px !important;
                 color: #FFFFFF !important;
                 font-weight: 600 !important;
-                font-size: 13px !important;
+                font-size: 13px !important; /* Ajuste o tamanho do texto aqui */
                 text-align: center !important;
                 width: 100% !important;
                 transition: all 0.2s ease-in-out !important;
                 cursor: pointer !important;
             }
+            /* Garante cor branca no texto dos botões em estado normal */
             div[data-testid="stRadio"] div[role="radiogroup"] label p,
             div[data-testid="stRadio"] div[role="radiogroup"] label span {
                 color: #FFFFFF !important;
             }
+            /* Efeito de destaque (hover) ao passar o mouse por cima do botão */
             div[data-testid="stRadio"] div[role="radiogroup"] label:hover {
                 border-color: #38BDF8 !important;
                 box-shadow: 0px 0px 8px rgba(56, 189, 248, 0.3) !important;
             }
+            /* Estilização do botão que estiver atualmente selecionado */
             div[data-testid="stRadio"] div[role="radiogroup"] label[data-checked="true"],
             div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) {
                 background: rgba(56, 189, 248, 0.1) !important;
                 border-color: #38BDF8 !important;
                 box-shadow: 0px 0px 10px rgba(56, 189, 248, 0.4) !important;
             }
+            /* Cor e negrito do texto para a opção que estiver selecionada */
             div[data-testid="stRadio"] div[role="radiogroup"] label[data-checked="true"] p,
             div[data-testid="stRadio"] div[role="radiogroup"] label[data-checked="true"] span {
                 color: #38BDF8 !important;
                 font-weight: bold !important;
             }
+            /* Oculta o círculo de seleção (radio button) nativo do HTML/Streamlit */
             div[data-testid="stRadio"] div[role="radiogroup"] label > div:first-child {
                 display: none !important;
             }
@@ -1193,25 +1201,25 @@ def renderizar_secao_mapa_hotspots_interativo(df):
     # e aplica o filtro correspondente no DataFrame.
     # ==============================================================================
     with col_controle:
-        st.markdown(
-            "<p style='color: #FFFFFF !important; font-size: 13px; margin-bottom:"
-            " 8px; font-weight: bold;'>JANELA DE ANÁLISE</p>",
-            unsafe_allow_html=True,
-        )
+            st.markdown(
+                "<p style='color: #FFFFFF !important; font-size: 13px; margin-top: 0px;"
+                " margin-bottom: 8px; font-weight: bold; padding-top: 32px;'>JANELA DE ANÁLISE</p>",
+                unsafe_allow_html=True,
+            )
 
-        opcao_filtro = st.radio(
-            label='Selecione a Janela:',
-            options=['Visão Geral (24 Horas)', 'Janela Crítica (16h-20h)'],
-            index=0,
-            key='filtro_mapa_ato3',
-        )
+            opcao_filtro = st.radio(
+                label='Selecione a Janela:',
+                options=['Visão Geral (24 Horas)', 'Janela Crítica (16h-20h)'],
+                index=0,
+                key='filtro_mapa_ato3',
+            )
 
-        is_pendular = opcao_filtro == 'Janela Crítica (16h-20h)'
+            is_pendular = opcao_filtro == 'Janela Crítica (16h-20h)'
 
-        if is_pendular:
-            df_filtrado = df_temp[df_temp['hora_int'].between(16, 20)]
-        else:
-            df_filtrado = df_temp
+            if is_pendular:
+                df_filtrado = df_temp[df_temp['hora_int'].between(16, 20)]
+            else:
+                df_filtrado = df_temp
 
 # ==============================================================================
     # BLOCO 4: AGRUPAMENTO EM TRECHOS DE 5 KM E FATORES DOMINANTES
