@@ -1326,19 +1326,33 @@ def renderizar_secao_mapa_hotspots_interativo(df):
             else:
                 str_sentido = 'N/A'
 
-            # Estilização do Card em HTML
+            # Estilização do Card Informativo em HTML/CSS inline
             card_html = (
-                f'<div style="background: transparent; border: 1.5px solid #38BDF8; padding: 14px; border-radius: 8px; margin-top: 15px; box-shadow: 0px 0px 8px rgba(56, 189, 248, 0.25);">'
-                f'<p style="color: #FFFFFF !important; font-size: 11px; margin-bottom: 6px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">RESUMO DAS 16H ÀS 20H</p>'
-                f'<p style="color: #94A3B8 !important; font-size: 10px; margin: 8px 0 2px 0; font-weight: 600;">CAUSA #1</p>'
-                f'<p style="color: #FFFFFF !important; font-size: 12px; font-weight: 600; margin: 0;">{causa_top1}</p>'
-                f'<p style="color: #94A3B8 !important; font-size: 10px; margin: 8px 0 2px 0; font-weight: 600;">TIPO DE ACIDENTE #1</p>'
-                f'<p style="color: #FFFFFF !important; font-size: 12px; font-weight: 600; margin: 0;">{tipo_top1}</p>'
-                f'<p style="color: #94A3B8 !important; font-size: 10px; margin: 8px 0 2px 0; font-weight: 600;">DIVISÃO DOS SENTIDOS</p>'
-                f'<p style="color: #38BDF8 !important; font-size: 12px; font-weight: bold; margin: 0;">{str_sentido}</p>'
-                f'</div>'
+                # Contêiner principal do Card (borda azul ciano, fundo transparente e sombra/brilho)
+                '<div style="background: transparent; border: 1.5px solid #38BDF8; padding: 14px 6px; border-radius: 8px; margin-top: 15px; box-shadow: 0px 0px 8px rgba(56, 189, 248, 0.25);">'
+
+                # Cabeçalho / Título superior do Card (Texto em caixa alta com espaçamento entre letras)
+                '<p style="color: #FFFFFF !important; font-size: 13px; margin-bottom: 6px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">RESUMO DAS 16H ÀS 20H</p>'
+                
+                # Rótulo: Causa Principal
+                '<p style="color: #64748B !important; font-size: 12px; margin: 8px 0 2px 0; font-weight: 600;">CAUSA #1</p>'
+                # Valor dinâmico da Causa Principal
+                f'<p style="color: #FFFFFF !important; font-size: 14px; font-weight: 600; margin: 0;">{causa_top1}</p>'
+                
+                # Rótulo: Tipo de Acidente
+                '<p style="color: #64748B !important; font-size: 12px; margin: 8px 0 2px 0; font-weight: 600;">TIPO DE ACIDENTE #1</p>'
+                # Valor dinâmico do Tipo de Acidente
+                f'<p style="color: #FFFFFF !important; font-size: 14px; font-weight: 600; margin: 0;">{tipo_top1}</p>'
+                
+                # Rótulo: Divisão dos Sentidos
+                '<p style="color: #64748B !important; font-size: 12px; margin: 8px 0 2px 0; font-weight: 600;">DIVISÃO DOS SENTIDOS</p>'
+                # Valor dinâmico da Divisão dos Sentidos (em azul destaque)
+                f'<p style="color: #38BDF8 !important; font-size: 14px; font-weight: bold; margin: 0;">{str_sentido}</p>'
+                
+                '</div>'
             )
 
+            # Renderiza o HTML no Streamlit
             st.markdown(card_html, unsafe_allow_html=True)
 
 # ==============================================================================
