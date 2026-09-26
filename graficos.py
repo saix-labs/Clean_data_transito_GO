@@ -1202,7 +1202,7 @@ def renderizar_secao_mapa_hotspots_interativo(df):
     # ==============================================================================
     with col_controle:
             st.markdown(
-                "<p style='color: #FFFFFF !important; font-size: 13px; margin-top: 0px;"
+                "<p style='color: #FFFFFF !important; font-size: 18px; margin-top: 0px;"
                 " margin-bottom: 8px; font-weight: bold; padding-top: 60px;'>JANELA DE ANÁLISE</p>",
                 unsafe_allow_html=True,
             )
