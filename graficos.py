@@ -1317,63 +1317,74 @@ def renderizar_secao_mapa_hotspots_interativo(df):
     # para o intervalo das 16h às 20h.
     # ==============================================================================
     with col_controle:
-        if is_pendular and not df_filtrado.empty:
-            # Causa #1 Global
-            causa_top1 = (
-                str(df_filtrado['causa_acidente'].mode().iloc[0]).title()
-                if 'causa_acidente' in df_filtrado.columns
-                and not df_filtrado['causa_acidente'].dropna().empty
-                else 'N/A'
-            )
+            if is_pendular and not df_filtrado.empty:
+                # Causa #1 Global (com %)
+                causas_validas = df_filtrado[
+                    df_filtrado['causa_acidente'].dropna().astype(str).str.strip().str.lower() != 'não informado'
+                ]['causa_acidente']
+                
+                if not causas_validas.empty:
+                    top_causa_nome = causas_validas.value_counts().index[0].title()
+                    top_causa_qtd = causas_validas.value_counts().iloc[0]
+                    pct_causa = (top_causa_qtd / len(causas_validas)) * 100
+                    causa_top1 = f"{top_causa_nome} ({pct_causa:.1f}%)"
+                else:
+                    causa_top1 = 'N/A'
 
-            # Tipo #1 Global
-            tipo_top1 = (
-                str(df_filtrado['tipo_acidente'].mode().iloc[0]).title()
-                if 'tipo_acidente' in df_filtrado.columns
-                and not df_filtrado['tipo_acidente'].dropna().empty
-                else 'N/A'
-            )
+                # Tipo #1 Global (com %)
+                tipos_validos = df_filtrado[
+                    df_filtrado['tipo_acidente'].dropna().astype(str).str.strip().str.lower() != 'não informado'
+                ]['tipo_acidente']
+                
+                if not tipos_validos.empty:
+                    top_tipo_nome = tipos_validos.value_counts().index[0].title()
+                    top_tipo_qtd = tipos_validos.value_counts().iloc[0]
+                    pct_tipo = (top_tipo_qtd / len(tipos_validos)) * 100
+                    tipo_top1 = f"{top_tipo_nome} ({pct_tipo:.1f}%)"
+                else:
+                    tipo_top1 = 'N/A'
 
-            # Sentido % Global (filtra 'não informado' de forma insensível a maiúsculas/minúsculas)
-            sentidos_validos = df_filtrado[
-                df_filtrado['sentido_via'].astype(str).str.lower() != 'não informado'
-            ]['sentido_via']
+                # Sentido % Global (filtra 'não informado' de forma insensível a maiúsculas/minúsculas)
+                sentidos_validos = df_filtrado[
+                    df_filtrado['sentido_via'].astype(str).str.lower() != 'não informado'
+                ]['sentido_via']
+                
+                total_sent = len(sentidos_validos)
+                if total_sent > 0:
+                    p_cres = (sentidos_validos.astype(str).str.lower() == 'crescente').sum() / total_sent * 100
+                    p_dec = 100 - p_cres
+                    str_sentido = f'{p_cres:.1f}% Crescente | {p_dec:.1f}% Decrescente'
+                else:
+                    str_sentido = 'N/A'
             
-            total_sent = len(sentidos_validos)
-            if total_sent > 0:
-                p_cres = (sentidos_validos.astype(str).str.lower() == 'crescente').sum() / total_sent * 100
-                p_dec = 100 - p_cres
-                str_sentido = f'{p_cres:.1f}% Crescente | {p_dec:.1f}% Decrescente'
-            else:
-                str_sentido = 'N/A'
 
-            # Estilização do Card Informativo em HTML/CSS inline
-            card_html = (
-                # Contêiner principal do Card (borda azul ciano, fundo transparente e sombra/brilho + ampliado na vertical)
-                '<div style="background: transparent; border: 1.5px solid #38BDF8; width: 250px; box-sizing: border-box; padding: 20px 6px; min-height: 240px; border-radius: 8px; margin-top: 15px; box-shadow: 0px 0px 8px rgba(56, 189, 248, 0.25);">'
-                # Cabeçalho / Título superior do Card (Texto em caixa alta com espaçamento entre letras)
-                '<p style="color: #FFFFFF !important; font-size: 13px; margin-bottom: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">RESUMO DAS 16H ÀS 20H</p>'
-                
-                # Rótulo: Causa Principal
-                '<p style="color: #64748B !important; font-size: 12px; margin: 8px 0 2px 0; font-weight: 600;">CAUSA #1</p>'
-                # Valor dinâmico da Causa Principal (com espaçamento maior antes do próximo rótulo)
-                f'<p style="color: #FFFFFF !important; font-size: 14px; font-weight: 600; margin: 0 0 25px 0;">{causa_top1}</p>'
-                
-                # Rótulo: Tipo de Acidente
-                '<p style="color: #64748B !important; font-size: 12px; margin: 8px 0 2px 0; font-weight: 600;">TIPO DE ACIDENTE #1</p>'
-                # Valor dinâmico do Tipo de Acidente (com espaçamento maior antes do próximo rótulo)
-                f'<p style="color: #FFFFFF !important; font-size: 14px; font-weight: 600; margin: 0 0 25px 0;">{tipo_top1}</p>'
-                
-                # Rótulo: Divisão dos Sentidos
-                '<p style="color: #64748B !important; font-size: 12px; margin: 8px 0 2px 0; font-weight: 600;">DIVISÃO DOS SENTIDOS</p>'
+                # Estilização do Card Informativo em HTML/CSS inline
+                card_html = (
+                    # Contêiner principal do Card (borda azul ciano, fundo transparente e sombra/brilho + ampliado na vertical)
+                    '<div style="background: transparent; border: 1.5px solid #38BDF8; width: 250px; box-sizing: border-box; padding: 20px 6px; min-height: 240px; border-radius: 8px; margin-top: 15px; box-shadow: 0px 0px 8px rgba(56, 189, 248, 0.25);">'
+                    # Cabeçalho / Título superior do Card (Texto em caixa alta com espaçamento entre letras)
+                    '<p style="color: #FFFFFF !important; font-size: 13px; margin-bottom: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">RESUMO DAS 16H ÀS 20H</p>'
+                    
+                    # Rótulo: Causa Principal
+                    '<p style="color: #64748B !important; font-size: 12px; margin: 8px 0 2px 0; font-weight: 600;">CAUSA #1</p>'
+                    # Valor dinâmico da Causa Principal (com espaçamento maior antes do próximo rótulo)
+                    f'<p style="color: #FFFFFF !important; font-size: 14px; font-weight: 600; margin: 0 0 25px 0;">{causa_top1}</p>'
+                    
+                    # Rótulo: Tipo de Acidente
+                    '<p style="color: #64748B !important; font-size: 12px; margin: 8px 0 2px 0; font-weight: 600;">TIPO DE ACIDENTE #1</p>'
+                    # Valor dinâmico do Tipo de Acidente (com espaçamento maior antes do próximo rótulo)
+                    f'<p style="color: #FFFFFF !important; font-size: 14px; font-weight: 600; margin: 0 0 25px 0;">{tipo_top1}</p>'
+                    
+                    # Rótulo: Divisão dos Sentidos
+                    '<p style="color: #64748B !important; font-size: 12px; margin: 8px 0 2px 0; font-weight: 600;">DIVISÃO DOS SENTIDOS</p>'
 
-                # Valor dinâmico da Divisão dos Sentidos (com quebra de linha <br> para separar os sentidos)
-                f'<p style="color: #38BDF8 !important; font-size: 14px; font-weight: bold; margin: 0; line-height: 1.4;">{str_sentido.replace(" | ", "<br>").replace(" / ", "<br>")}</p>'
-                '</div>'
+                    # Valor dinâmico da Divisão dos Sentidos (com quebra de linha <br> para separar os sentidos)
+                    f'<p style="color: #38BDF8 !important; font-size: 14px; font-weight: bold; margin: 0; line-height: 1.4;">{str_sentido.replace(" | ", "<br>").replace(" / ", "<br>")}</p>'
+                    '</div>'
                 )
 
-            # Renderiza o HTML no Streamlit
-            st.markdown(card_html, unsafe_allow_html=True)
+                # Renderiza o HTML no Streamlit
+                st.markdown(card_html, unsafe_allow_html=True)
 
 # ==============================================================================
     # BLOCO 6: RENDERIZAÇÃO DO MAPA NA COLUNA PRINCIPAL
