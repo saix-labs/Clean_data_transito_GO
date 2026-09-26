@@ -23,7 +23,7 @@ from graficos import (
     criar_kpis_ato3,
     criar_fig_acidentes_por_hora,
     renderizar_secao_sentido_via,
-    renderizar_secao_mapa_hotspots_interativo
+    renderizar_secao_mapa_hotspots_interativo,
 )
 
 # 1. Configuração inicial da página
