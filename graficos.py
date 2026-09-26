@@ -294,7 +294,7 @@ def criar_kpis_ato2(df):
     kpi1, kpi2, kpi3, kpi4 = st.columns(4)
 
     with kpi1:
-        st.metric(label="Traçado Predominante", value=f"{pct_reta:.1f}%")
+        st.metric(label="Em linha Reta", value=f"{pct_reta:.1f}%")
 
     with kpi2:
         st.metric(label="Acidentes Não Fatais", value=f"{pct_controlada:.1f}%")
@@ -1351,6 +1351,7 @@ def renderizar_secao_mapa_hotspots_interativo(df):
                     size='total_acidentes',
                     color='total_acidentes',
                     color_continuous_scale='Reds',
+                    range_color=[0, 10], # <--- Destaca as cores dos trechos a partir de 10 acidentes
                     size_max=28,
                     zoom=6.5,
                     center=dict(lat=-16.6869, lon=-49.2648),
@@ -1366,6 +1367,14 @@ def renderizar_secao_mapa_hotspots_interativo(df):
                         'longitude': False,
                     },
                     mapbox_style='open-street-map',
+                )
+
+                # Mantém as bolinhas bem visíveis e com contorno nítido
+                fig_mapa.update_traces(
+                    marker=dict(
+                        sizemin=8, # Tamanho mínimo para não sumir no mapa
+                        opacity=0.9,
+                    )
                 )
                 fig_mapa.update_traces(
                     hovertemplate=(
@@ -1385,6 +1394,7 @@ def renderizar_secao_mapa_hotspots_interativo(df):
                     size='total_acidentes',
                     color='total_acidentes',
                     color_continuous_scale='Reds',
+                    range_color=[10, 60], # <--- Calibra a escala para dar destaque às bolinhas a partir de 10 acidentes
                     size_max=28,
                     zoom=6.5,
                     center=dict(lat=-16.6869, lon=-49.2648),
@@ -1397,6 +1407,14 @@ def renderizar_secao_mapa_hotspots_interativo(df):
                         'longitude': False,
                     },
                     mapbox_style='open-street-map',
+                )
+
+                # Mantém as bolinhas bem visíveis e com contorno nítido
+                fig_mapa.update_traces(
+                    marker=dict(
+                        sizemin=8, # Tamanho mínimo para garantir visibilidade
+                        opacity=0.9,
+                    )
                 )
                 fig_mapa.update_traces(
                     hovertemplate=(
