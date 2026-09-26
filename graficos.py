@@ -1203,7 +1203,28 @@ def renderizar_secao_mapa_hotspots_interativo(df):
     with col_controle:
             st.markdown(
                 "<p style='color: #FFFFFF !important; font-size: 13px; margin-top: 0px;"
-                " margin-bottom: 8px; font-weight: bold; padding-top: 32px;'>JANELA DE ANÁLISE</p>",
+                " margin-bottom: 8px; font-weight: bold; padding-top: 60px;'>JANELA DE ANÁLISE</p>",
+                unsafe_allow_html=True,
+            )
+
+            # INJEÇÃO DE CSS: Ajuste a largura dos botões do filtro aqui!
+            st.markdown(
+                """
+                <style>
+                /* Ajusta o container do st.radio na coluna de controle */
+                div[data-testid="stRadio"] {
+                    width: 250px !important; /* <--- AJUSTE A LARGURA AQUI  */
+                }
+                /* Força as opções/botões internos a ocuparem 100% da largura definida acima */
+                div[data-testid="stRadio"] > div {
+                    width: 100% !important;
+                }
+                div[data-testid="stRadio"] label {
+                    width: 100% !important;
+                    box-sizing: border-box !important;
+                }
+                </style>
+                """,
                 unsafe_allow_html=True,
             )
 
@@ -1329,8 +1350,7 @@ def renderizar_secao_mapa_hotspots_interativo(df):
             # Estilização do Card Informativo em HTML/CSS inline
             card_html = (
                 # Contêiner principal do Card (borda azul ciano, fundo transparente e sombra/brilho + ampliado na vertical)
-                '<div style="background: transparent; border: 1.5px solid #38BDF8; padding: 20px 6px; min-height: 240px; border-radius: 8px; margin-top: 15px; box-shadow: 0px 0px 8px rgba(56, 189, 248, 0.25);">'
-
+                '<div style="background: transparent; border: 1.5px solid #38BDF8; width: 250px; box-sizing: border-box; padding: 20px 6px; min-height: 240px; border-radius: 8px; margin-top: 15px; box-shadow: 0px 0px 8px rgba(56, 189, 248, 0.25);">'
                 # Cabeçalho / Título superior do Card (Texto em caixa alta com espaçamento entre letras)
                 '<p style="color: #FFFFFF !important; font-size: 13px; margin-bottom: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">RESUMO DAS 16H ÀS 20H</p>'
                 
