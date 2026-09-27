@@ -958,7 +958,7 @@ def criar_fig_acidentes_por_hora(df):
 
     return fig
 
-
+    
 
 
 
@@ -1107,6 +1107,12 @@ def extrair_fator_dominante(serie):
 # FUNÇÃO PRINCIPAL DA SEÇÃO DO MAPA
 # ==============================================================================
 def renderizar_secao_mapa_hotspots_interativo(df):
+    # Linha divisória idêntica às outras páginas
+    st.markdown("---")
+
+    # Respiro vertical que isola o Mapa no centro da tela ao rolar (efeito F11)
+    st.markdown('<div style="height: 200px; display: block; clear: both;"></div>', unsafe_allow_html=True)
+    
     """Renderiza o Mapa Interativo de Hotspots em fatias de 10km (80% da tela)
 
     e o Painel Lateral de Controle/Card Informativo (20% da tela).
