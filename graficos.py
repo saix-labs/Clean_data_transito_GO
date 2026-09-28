@@ -937,15 +937,31 @@ def criar_fig_acidentes_por_hora(df):
     # 4. Construção do Gráfico com Plotly Graph Objects
     fig = go.Figure()
 
+    # Linha principal com todas as 24 horas (Base Neutra)
     fig.add_trace(
         go.Scatter(
             x=df_completo['Hora_Label'],
             y=df_completo['Total'],
             mode='lines+markers',
             name='Acidentes',
-            line=dict(color='#00F3FF', width=3),               # Linha Cyan Neon
-            marker=dict(size=8, color='#08519c', line=dict(color='#00F3FF', width=2)), # Ponto com borda neon
+            line=dict(color='#6baed6', width=2.5),
+            marker=dict(size=6, color="#FFFFFF"),
             hovertemplate='<b>%{x}</b><br>Total: <b>%{y} acidentes</b><extra></extra>'
+        )
+    )
+
+    # Destaque para o Pico Pendular (das 15:00h às 20:00h usando a coluna 'Hora' numérica)
+    df_pico = df_completo[(df_completo['Hora'] >= 15) & (df_completo['Hora'] <= 20)]
+
+    fig.add_trace(
+        go.Scatter(
+            x=df_pico['Hora_Label'],
+            y=df_pico['Total'],
+            mode='lines+markers',
+            name='Horário Crítico',
+            line=dict(color='#FF1744', width=4),
+            marker=dict(size=8, color='#FF80AB'),
+            hovertemplate='<b>%{x} (Horário Crítico)</b><br>Total: <b>%{y} acidentes</b><extra></extra>'
         )
     )
 
@@ -955,21 +971,22 @@ def criar_fig_acidentes_por_hora(df):
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         font=dict(color='white', size=12),
+        showlegend=False,
         hoverlabel=dict(bgcolor='#111827', font_color='#FFFFFF', font_size=13),
         xaxis=dict(
             title=dict(text="Horário do Dia", font=dict(color='#A0AEC0')),
             showgrid=False,
             zeroline=False,
             tickangle=0,
-            tickfont=dict(color='#A0AEC0'),
+            tickfont=dict(color='#FFFFFF'),
             range=[-0.2, len(df_completo['Hora_Label']) - 0.8] # Estica o gráfico até as pontas
         ),
         yaxis=dict(
-            title=dict(text="Quantidade de Acidentes", font=dict(color='#A0AEC0')),
+            title=dict(text="Quantidade de Acidentes", font=dict(color='#FFFFFF')),
             showgrid=True,
             gridcolor='rgba(255, 255, 255, 0.08)', # Linhas de grade bem discretas
             zeroline=False,
-            tickfont=dict(color='#A0AEC0')
+            tickfont=dict(color='#FFFFFF')
         )
     )
 
@@ -1007,8 +1024,9 @@ def criar_fig_sentido_bipolar(df):
         x=['Decrescente', 'Crescente'],
         orientation='h',
         color_discrete_map={
-            'Crescente': '#2171b5',   # Azul vibrante
-            'Decrescente': '#08306b'  # Azul marinho profundo
+            'Crescente': '#FF1744',   # Azul vibrante
+            'Decrescente': '#6BAED6'
+            ''  # Azul marinho profundo
         }
     )
 
@@ -1087,11 +1105,6 @@ def renderizar_secao_sentido_via(df):
 
 
 
-import numpy as np
-import pandas as pd
-import plotly.express as px
-import streamlit as st
-
 
 # ==============================================================================
 # BLOCO 0: FUNÇÃO UTILITÁRIA DE FATOR DOMINANTE (Posicionada no escopo global)
@@ -1168,20 +1181,20 @@ def renderizar_secao_mapa_hotspots_interativo(df):
             }
             /* Efeito de destaque (hover) ao passar o mouse por cima do botão */
             div[data-testid="stRadio"] div[role="radiogroup"] label:hover {
-                border-color: #38BDF8 !important;
-                box-shadow: 0px 0px 8px rgba(56, 189, 248, 0.3) !important;
+                border-color: #FF1744 !important;
+                box-shadow: 0px 0px 8px rgba(255, 23, 68, 0.3) !important;
             }
             /* Estilização do botão que estiver atualmente selecionado */
             div[data-testid="stRadio"] div[role="radiogroup"] label[data-checked="true"],
             div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) {
-                background: rgba(56, 189, 248, 0.1) !important;
-                border-color: #38BDF8 !important;
-                box-shadow: 0px 0px 10px rgba(56, 189, 248, 0.4) !important;
+                background: rgba(255, 23, 68, 0.1) !important;
+                border-color: #FF1744 !important;
+                box-shadow: 0px 0px 10px rgba(255, 23, 68, 0.4) !important;
             }
             /* Cor e negrito do texto para a opção que estiver selecionada */
             div[data-testid="stRadio"] div[role="radiogroup"] label[data-checked="true"] p,
             div[data-testid="stRadio"] div[role="radiogroup"] label[data-checked="true"] span {
-                color: #38BDF8 !important;
+                color: #FF1744 !important;
                 font-weight: bold !important;
             }
             /* Oculta o círculo de seleção (radio button) nativo do HTML/Streamlit */
@@ -1189,7 +1202,7 @@ def renderizar_secao_mapa_hotspots_interativo(df):
                 display: none !important;
             }
         </style>
-    """,
+        """,
         unsafe_allow_html=True,
     )
 
@@ -1383,8 +1396,8 @@ def renderizar_secao_mapa_hotspots_interativo(df):
 
                 # Estilização do Card Informativo em HTML/CSS inline
                 card_html = (
-                    # Contêiner principal do Card (borda azul ciano, fundo transparente e sombra/brilho + ampliado na vertical)
-                    '<div style="background: transparent; border: 1.5px solid #38BDF8; width: 250px; box-sizing: border-box; padding: 20px 6px; min-height: 240px; border-radius: 8px; margin-top: 15px; box-shadow: 0px 0px 8px rgba(56, 189, 248, 0.25);">'
+                    # Contêiner principal do Card (borda vermelho alerta, fundo transparente e sombra/brilho suave + ampliado na vertical)
+                    '<div style="background: transparent; border: 1.5px solid #FF1744; width: 250px; box-sizing: border-box; padding: 20px 6px; min-height: 240px; border-radius: 8px; margin-top: 15px; box-shadow: 0px 0px 10px rgba(255, 23, 68, 0.35);">'
                     # Cabeçalho / Título superior do Card (Texto em caixa alta com espaçamento entre letras)
                     '<p style="color: #FFFFFF !important; font-size: 13px; margin-bottom: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">RESUMO DAS 16H ÀS 20H</p>'
                     
@@ -1401,8 +1414,8 @@ def renderizar_secao_mapa_hotspots_interativo(df):
                     # Rótulo: Divisão dos Sentidos
                     '<p style="color: #64748B !important; font-size: 12px; margin: 8px 0 2px 0; font-weight: 600;">DIVISÃO DOS SENTIDOS</p>'
 
-                    # Valor dinâmico da Divisão dos Sentidos (com quebra de linha <br> para separar os sentidos)
-                    f'<p style="color: #38BDF8 !important; font-size: 14px; font-weight: bold; margin: 0; line-height: 1.4;">{str_sentido.replace(" | ", "<br>").replace(" / ", "<br>")}</p>'
+                    # Valor dinâmico da Divisão dos Sentidos (com quebra de linha <br> para separar os sentidos em Vermelho Alerta)
+                    f'<p style="color: #FF1744 !important; font-size: 14px; font-weight: bold; margin: 0; line-height: 1.4;">{str_sentido.replace(" | ", "<br>").replace(" / ", "<br>")}</p>'
                     '</div>'
                 )
 
