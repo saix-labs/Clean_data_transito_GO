@@ -48,6 +48,31 @@ def criar_kpis_ato1(df):
             st.subheader("Ranking de BRs com Mais Ocorrências")
             st.plotly_chart(criar_fig_br(df), use_container_width=True)
 
+        st.markdown("""
+        <div style="
+            background: transparent; 
+            border: 1.5px solid #FFFFFF; 
+            border-radius: 8px; 
+            padding: 16px 20px; 
+            margin-top: -50px; 
+            margin-bottom: 25px; 
+            text-align: center;
+        ">
+            <p style="
+                color: #FFFFFF; 
+                font-size: 15px; 
+                line-height: 1.6; 
+                margin: 0;
+                font-weight: 400;
+            ">
+                A acidentalidade concentra-se nos períodos de maior circulação,
+                  liderada pelo pleno dia. Geograficamente,
+                    há um forte adensamento nos eixos estruturantes das BR-153 e BR-060,
+                      trechos com o volume de tráfego mais intenso do estado.
+            </p>
+        </div>
+""", unsafe_allow_html=True)
+
     # --- ESPAÇADOR DE TELA (Garante o isolamento da Linha 1 no F11) ---
     st.markdown("<div style='margin-bottom: 35vh;'></div>", unsafe_allow_html=True)
 
@@ -63,6 +88,32 @@ def criar_kpis_ato1(df):
             st.subheader("Clima: Condição Meteorológica")
             st.plotly_chart(criar_fig_clima(df), use_container_width=True)
 
+
+        st.markdown("""
+        <div style="
+            background: transparent; 
+            border: 1.5px solid #FFFFFF; 
+            border-radius: 8px; 
+            padding: 16px 20px; 
+            margin-top: -50px; 
+            margin-bottom: 25px; 
+            text-align: center;
+        ">
+            <p style="
+                color: #FFFFFF; 
+                font-size: 15px; 
+                line-height: 1.6; 
+                margin: 0;
+                font-weight: 400;
+            ">
+                 Contrapondo o senso comum,
+                   o clima adverso e as pistas simples não são os principais motores da acidentalidade.
+                     A maior concentração de casos ocorre em pistas duplicadas e sob céu claro,
+                       indicando que a percepção de segurança induz os condutores ao excesso de confiança e à desatenção.
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
+
             
     # --- MAPA DE CALOR POR MUNICÍPIO E TOP 5 CIDADES ---
     st.markdown("---")
@@ -77,6 +128,33 @@ def criar_kpis_ato1(df):
 
     col_t1, col_t2, col_t3, col_t4, col_t5 = st.columns(5)
     cols = [col_t1, col_t2, col_t3, col_t4, col_t5]
+
+    st.markdown("""
+                    <div style="
+                        background: transparent; 
+                        border: 1.5px solid #FFFFFF; 
+                        border-radius: 8px; 
+                        padding: 16px 20px; 
+                        margin-top: -70px; 
+                        margin-bottom: 25px; 
+                        text-align: center;
+                    ">
+                        <p style="
+                            color: #FFFFFF; 
+                            font-size: 15px; 
+                            line-height: 1.6; 
+                            margin: 0;
+                            font-weight: 400;
+                        ">
+                             O mapeamento municipal expõe que as ocorrências se concentram 
+                             em dois perfis específicos:
+                               os maiores polos econômicos do estado (Goiânia, Anápolis e Rio Verde)
+                                 e os municípios do Entorno do Distrito Federal,
+                                   caracterizados pelo intenso fluxo de deslocamento diário 
+                                   (como Luziânia e Valparaíso de Goiás).
+                        </p>
+                    </div>
+                """, unsafe_allow_html=True)
 
     for i, row in top5_cidades.iterrows():
         with cols[i]:
