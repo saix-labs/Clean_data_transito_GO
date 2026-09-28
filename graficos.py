@@ -118,13 +118,18 @@ def criar_fig_br(df):
     df_br.columns = ['BR', 'Total']
     df_br['BR'] = "BR-" + df_br['BR'].astype(str)
     
+    # Mapeia dinamicamente as 2 maiores BRs para Vermelho e as demais para Azul Escuro
+    top_brs = df_br['BR'].tolist()
+    cores_br = {br: '#FF1744' if i < 2 else '#1f77b4' for i, br in enumerate(top_brs)}
+    
     fig = px.bar(
         df_br, 
         x='Total', 
         y='BR', 
         orientation='h',
         text='Total',
-        color_discrete_sequence=['#1f77b4'] # Azul sólido mantendo o padrão visual
+        color='BR',
+        color_discrete_map=cores_br
     )
     fig.update_layout(
         yaxis={'categoryorder':'total ascending', 'tickfont': {'color': '#FFFFFF', 'size': 14}}, 
@@ -148,14 +153,20 @@ def criar_fig_pista(df):
     df_pista = df['tipo_pista'].value_counts().reset_index()
     df_pista.columns = ['Tipo de Pista', 'Total']
     
+    # Identifica o tipo de pista líder (com maior total) e atribui o Vermelho Alerta
+    maior_pista = df_pista.iloc[0]['Tipo de Pista']
+    cores_pista = {pista: '#FF1744' if pista == maior_pista else '#1f77b4' for pista in df_pista['Tipo de Pista']}
+    
     fig = px.bar(
         df_pista, 
         x='Tipo de Pista', 
         y='Total', 
         text='Total',
-        color_discrete_sequence=['#1f77b4']
+        color='Tipo de Pista',
+        color_discrete_map=cores_pista
     )
     fig.update_layout(
+        showlegend=False,
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         font=dict(color='white'),
@@ -175,14 +186,20 @@ def criar_fig_clima(df):
     df_clima = df['condicao_metereologica'].value_counts().head(5).reset_index()
     df_clima.columns = ['Condição', 'Total']
     
+    # Identifica a maior condição climática e atribui o Vermelho Alerta
+    maior_clima = df_clima.iloc[0]['Condição']
+    cores_clima = {clima: '#FF1744' if clima == maior_clima else '#1f77b4' for clima in df_clima['Condição']}
+    
     fig = px.bar(
         df_clima, 
         x='Condição', 
         y='Total', 
         text='Total',
-        color_discrete_sequence=['#2b5c8f']
+        color='Condição',
+        color_discrete_map=cores_clima
     )
     fig.update_layout(
+        showlegend=False,
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         font=dict(color='white'),
@@ -190,13 +207,13 @@ def criar_fig_clima(df):
         yaxis=dict(tickfont=dict(color='#FFFFFF', size=14))
     )
     
-    # Força os rótulos diretos do gráfico (números, porcentagens ou legendas internas) a ficarem brancos
+    # Força os rótulos diretos do gráfico a ficarem brancos
     fig.update_traces(
         textfont=dict(color='#FFFFFF', size=13)
     )
     
     return fig
-
+    
 
 def criar_fig_mapa(df):
     df_municipio = df['municipio'].value_counts().reset_index()
