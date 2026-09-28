@@ -1,11 +1,11 @@
-# #%%
-# import pandas as pd
-# import datetime
+#%%
+import pandas as pd
+import datetime
 
-# #importar o arquivo csv
-# #%%
-# df = pd.read_csv('acidentes-GO-2024_2025_limpo.csv')
-# # %%
+#importar o arquivo csv
+#%%
+df = pd.read_csv('acidentes-GO-2024_2025_limpo.csv')
+ # %%
 
 
 
@@ -320,3 +320,14 @@
 #     print(f"Crescente: {p_cres:.1f}%")
 #     print(f"Decrescente: {p_dec:.1f}%")
 # # %%
+
+
+
+#%%
+df.info()
+# %%
+
+
+#%%
+df['fase_dia'].value_counts
+# %%

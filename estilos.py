@@ -36,15 +36,15 @@ def aplicar_estilos():
         /* === ESTILIZAÇÃO AZUL NEON PARA CARDS E MÉTRICAS === */
         /* Rótulos (Texto/Palavras do Top 5 e Cards de Métricas) */
         [data-testid="stMetricLabel"] {
-            color: #00f3ff !important;
+            color: #ffffff !important;
             font-weight: bold !important;
-            text-shadow: 0 0 8px rgba(0, 243, 255, 0.4);
+            text-shadow: none !important;
         }
         
         /* Valores numéricos das métricas */
         [data-testid="stMetricValue"] {
-            color: #ffffff !important;
-            text-shadow: 0 0 10px rgba(0, 243, 255, 0.6);
+            color: #FF1744 !important;
+            text-shadow: 0 0 10px rgba(255, 23, 68, 0.6);
         }
 
         /* === BOTÃO DE EXPANDIR (FORA DA SIDEBAR) === */
