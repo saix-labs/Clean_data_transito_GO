@@ -852,21 +852,44 @@ def criar_kpis_ato3(df):
     df_temp = df.copy()
     horas = pd.to_datetime(df_temp['horario'].astype(str), format='%H:%M:%S', errors='coerce').dt.hour
     
-    # Filtra entre 16h e 20h (inclusive)
-    acidentes_pico = horas.between(16, 20).sum()
+    # Extrai hora e minuto numéricos
+    hora_num = pd.to_numeric(df['horario'].str.split(':').str[0], errors='coerce')
+    min_num = pd.to_numeric(df['horario'].str.split(':').str[1], errors='coerce')
+
+    # Condição: de 16:00 a 19:59 OU exatamente 20:00 (minuto 0)
+    filtro_pico = ((hora_num >= 16) & (hora_num < 20)) | ((hora_num == 20) & (min_num == 0))
+
+    acidentes_pico = filtro_pico.sum()
     pct_janela_critica = (acidentes_pico / total) * 100
 
     # KPI 2: Sentido Crescente
     qtd_crescente = (df['sentido_via'].astype(str).str.strip().str.lower() == 'crescente').sum()
     pct_crescente = (qtd_crescente / total) * 100
 
-    # KPI 3: Hotspots na BR Líder (BR-153)
-    br_series = df['br'].astype(str).str.extract(r'(\d+)')[0] # Extrai número da BR
-    br_top1 = br_series.mode()[0] if not br_series.empty else "153"
     
-    # Filtra os KMs únicos da BR mais crítica
-    df_br_top = df[br_series == br_top1]
-    kms_criticos = df_br_top['km'].nunique()
+    # Filtra e agrupa os KMs em janelas de 5 km para todas as BRs
+    # Filtra o intervalo de horário crítico (16h às 20h00 exatas)
+    df_temp = df.copy()
+
+    # Extrai hora e minuto via split para evitar qualquer erro de formato
+    hora_minuto = df_temp['horario'].astype(str).str.split(':', expand=True)
+    df_temp['hora_num'] = pd.to_numeric(hora_minuto[0], errors='coerce')
+    df_temp['min_num'] = pd.to_numeric(hora_minuto[1], errors='coerce')
+
+    # Filtra das 16:00 às 19:59 + o minuto exato das 20:00
+    filtro_pico = (
+        (df_temp['hora_num'].isin([16, 17, 18, 19])) | 
+        ((df_temp['hora_num'] == 20) & (df_temp['min_num'] == 0))
+    )
+    df_temp = df_temp[filtro_pico]
+
+    # Agrupa os KMs em janelas de 5 km para todas as BRs
+    df_temp['km_num'] = pd.to_numeric(df_temp['km'], errors='coerce')
+    df_temp['trecho_5km'] = (df_temp['km_num'] // 5) * 5
+
+    # Conta acidentes por BR e trecho de 5km e filtra os com 10 ou mais acidentes
+    trechos_agrupados = df_temp.groupby(['br', 'trecho_5km']).size().reset_index(name='total_acidentes')
+    kms_criticos = len(trechos_agrupados[trechos_agrupados['total_acidentes'] >= 10])
 
     # CSS cirúrgico para forçar largura 100% e alinhamento central em todos os sub-elementos da métrica
     st.markdown("""
@@ -913,7 +936,7 @@ def criar_kpis_ato3(df):
 
     with kpi3:
         st.metric(
-            label=f"Hotspots KMs (BR-{br_top1})", 
+            label="Trechos Críticos (16h-20h)", 
             value=f"{kms_criticos} Trechos"
         )
 
@@ -967,8 +990,8 @@ def criar_fig_acidentes_por_hora(df):
         )
     )
 
-    # Destaque para o Pico Pendular (das 15:00h às 20:00h usando a coluna 'Hora' numérica)
-    df_pico = df_completo[(df_completo['Hora'] >= 15) & (df_completo['Hora'] <= 20)]
+    # Destaque para o Pico Pendular (das 16:00h às 20:00h usando a coluna 'Hora' numérica)
+    df_pico = df_completo[(df_completo['Hora'] >= 16) & (df_completo['Hora'] <= 20)]
 
     fig.add_trace(
         go.Scatter(
@@ -1287,11 +1310,17 @@ def renderizar_secao_mapa_hotspots_interativo(df):
                 index=0,
                 key='filtro_mapa_ato3',
             )
-
             is_pendular = opcao_filtro == 'Janela Crítica (16h-20h)'
 
             if is_pendular:
-                df_filtrado = df_temp[df_temp['hora_int'].between(16, 20)]
+                # Extrai hora e minuto para garanta a janela exata (16:00:00 até 20:00:00)
+                hora_num = pd.to_numeric(df_temp['horario'].astype(str).str.split(':').str[0], errors='coerce')
+                min_num = pd.to_numeric(df_temp['horario'].astype(str).str.split(':').str[1], errors='coerce')
+
+                # Pega as horas 16, 17, 18, 19 + o minuto exato das 20:00
+                filtro_pico = ((hora_num >= 16) & (hora_num < 20)) | ((hora_num == 20) & (min_num == 0))
+                
+                df_filtrado = df_temp[filtro_pico]
             else:
                 df_filtrado = df_temp
 
@@ -1323,7 +1352,7 @@ def renderizar_secao_mapa_hotspots_interativo(df):
             pct_dec = 100 - pct_cres
             return f'{pct_cres:.0f}% Crescente | {pct_dec:.0f}% Decrescente'
 
-# Agrupando por BR e Trecho de 5 km
+        # Agrupando por BR e Trecho de 5 km
         agrupados = []
         for (br_val, trecho_val), g in df_valid.groupby(['br', 'trecho_5km']):
             total_ac = len(g)

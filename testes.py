@@ -323,11 +323,128 @@ df = pd.read_csv('acidentes-GO-2024_2025_limpo.csv')
 
 
 
-#%%
-df.info()
-# %%
+# #%%
+# df.info()
+# # %%
 
 
-#%%
-df['fase_dia'].value_counts
-# %%
+# #%%
+# df['fase_dia'].value_counts
+# # %%
+
+
+# # %% Calcular porcentagem do horário pendular (16h às 19h59)
+
+# # 1. Extrai apenas o número da hora (0 a 23), ignorando os minutos
+# # 1. Extrai apenas o número da hora (0 a 23) tratando qualquer formato (com ou sem data/segundos)
+# df['hora_inteira'] = pd.to_datetime(df['horario'], errors='coerce').dt.hour
+
+# # 2. Define o bloco do horário pendular (horas 16, 17, 18 e 19)
+# horas_pendulares = [16, 17, 18, 19]
+
+# # 3. Calcula os totais e a porcentagem
+# total_acidentes = len(df.dropna(subset=['hora_inteira']))
+# acidentes_pendular = len(df[df['hora_inteira'].isin(horas_pendulares)])
+# porcentagem_pendular = (acidentes_pendular / total_acidentes) * 100
+
+# # 4. Exibe os resultados para a tese
+# print(f"Total Geral (24h): {total_acidentes}")
+# print(f"Total Pendular (16h-20h): {acidentes_pendular}")
+# print(f"Porcentagem do Bloco Pendular: {porcentagem_pendular:.2f}%")
+
+# # %%
+
+
+
+
+
+# # %% Calcular porcentagem do horário pendular (16h às 20h00)
+
+# # 1. Converte a coluna para o tipo datetime/time para extrair hora e minuto
+# df_temp = df.copy()
+# df_temp['dt_temp'] = pd.to_datetime(df_temp['horario'], errors='coerce')
+# df_temp['hora_num'] = df_temp['dt_temp'].dt.hour
+# df_temp['min_num'] = df_temp['dt_temp'].dt.minute
+
+# # 2. Filtra das 16:00 às 19:59 (horas 16, 17, 18 e 19) + o minuto exato das 20:00
+# filtro_pendular = (
+#     (df_temp['hora_num'].isin([16, 17, 18, 19])) | 
+#     ((df_temp['hora_num'] == 20) & (df_temp['min_num'] == 0))
+# )
+
+# # 3. Calcula os totais e a porcentagem com precisão cirúrgica
+# total_acidentes = len(df_temp.dropna(subset=['hora_num']))
+# acidentes_pendular = filtro_pendular.sum()
+# porcentagem_pendular = (acidentes_pendular / total_acidentes) * 100
+
+# # 4. Exibe os resultados para a tese
+# print(f"Total Geral (24h): {total_acidentes}")
+# print(f"Total Pendular (16h-20h00): {acidentes_pendular}")
+# print(f"Porcentagem do Bloco Pendular: {porcentagem_pendular:.2f}%")
+
+# # %%
+
+
+
+
+
+
+# # %% Validação e Comparação do Filtro Horário (16h-20h00)
+
+# import pandas as pd
+
+# # 1. Carregue seu DataFrame aqui (substitua 'seu_arquivo.csv' se necessário)
+# # df = pd.read_csv("seu_arquivo.csv")
+
+# # Fazemos uma cópia para não alterar o DataFrame original
+# df_temp = df.copy()
+
+# # 2. Extração segura de Hora e Minuto
+# hora_min = df_temp['horario'].astype(str).str.split(':', expand=True)
+# df_temp['hora_num'] = pd.to_numeric(hora_min[0], errors='coerce')
+# df_temp['min_num'] = pd.to_numeric(hora_min[1], errors='coerce')
+
+# # --- MÉTODO 1: <= 20 (Inclui de 20:01 até 20:59) ---
+# filtro_metodo1 = (df_temp['hora_num'] >= 16) & (df_temp['hora_num'] <= 20)
+# df_m1 = df_temp[filtro_metodo1].copy()
+
+# # Cálculo de Trechos Críticos no Método 1
+# df_m1['km_num'] = pd.to_numeric(df_m1['km'], errors='coerce')
+# df_m1['trecho_5km'] = (df_m1['km_num'] // 5) * 5
+# trechos_m1 = df_m1.groupby(['br', 'trecho_5km']).size().reset_index(name='total_acidentes')
+# kms_criticos_m1 = len(trechos_m1[trechos_m1['total_acidentes'] >= 10])
+
+
+# # --- MÉTODO 2: Cirúrgico (16:00 até exatas 20:00) ---
+# filtro_metodo2 = (
+#     (df_temp['hora_num'].isin([16, 17, 18, 19])) | 
+#     ((df_temp['hora_num'] == 20) & (df_temp['min_num'] == 0))
+# )
+# df_m2 = df_temp[filtro_metodo2].copy()
+
+# # Cálculo de Trechos Críticos no Método 2
+# df_m2['km_num'] = pd.to_numeric(df_m2['km'], errors='coerce')
+# df_m2['trecho_5km'] = (df_m2['km_num'] // 5) * 5
+# trechos_m2 = df_m2.groupby(['br', 'trecho_5km']).size().reset_index(name='total_acidentes')
+# kms_criticos_m2 = len(trechos_m2[trechos_m2['total_acidentes'] >= 10])
+
+
+# # --- EXIBIÇÃO E PROVA REAL NO TERMINAL ---
+# print("=" * 65)
+# print("📊 COMPARAÇÃO DE MÉTODOS DE FILTRAGEM DE HORÁRIO")
+# print("=" * 65)
+
+# print(f"\n1️⃣ Método Genérico (hora_num <= 20) [Inclui 20:01 às 20:59]:")
+# print(f"   • Total de Ocorrências: {len(df_m1)}")
+# print(f"   • Trechos Críticos (10+ acidentes em 5km): {kms_criticos_m1}")
+
+# print(f"\n2️⃣ Método Cirúrgico (16:00h até exatas 20:00h):")
+# print(f"   • Total de Ocorrências: {len(df_m2)}")
+# print(f"   • Trechos Críticos (10+ acidentes em 5km): {kms_criticos_m2}")
+
+# diferenca_registros = len(df_m1) - len(df_m2)
+# print("\n" + "-" * 65)
+# print(f"⚠️ DIFERENÇA: {diferenca_registros} registros ocorridos APÓS as 20:00h estavam no Método 1.")
+# print("=" * 65)
+
+# # %%
