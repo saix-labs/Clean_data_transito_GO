@@ -90,13 +90,29 @@ def criar_fig_turno(df):
     df_turno = df['fase_dia'].value_counts().reset_index()
     df_turno.columns = ['Fase do Dia', 'Total']
     
+    # Mapeamento dinâmico de cores: Top 1 e Top 2 em tons de vermelho, demais em azul
+    categorias = df_turno['Fase do Dia'].tolist()
+    tons_azul = px.colors.sequential.Blues_r
+    
+    mapa_cores = {}
+    for i, cat in enumerate(categorias):
+        if i == 0:
+            mapa_cores[cat] = '#FF1744'  # Maior fatia (Top 1)
+        elif i == 1:
+            mapa_cores[cat] = '#FF5252'  # Segunda maior fatia (Top 2)
+        else:
+            # Distribui as demais fatias nos tons de azul sequencial
+            mapa_cores[cat] = tons_azul[(i - 2) % len(tons_azul)]
+    
     fig = px.pie(
         df_turno, 
         values='Total', 
         names='Fase do Dia', 
         hole=0.5,
-        color_discrete_sequence=px.colors.sequential.Blues_r
+        color='Fase do Dia',
+        color_discrete_map=mapa_cores
     )
+    
     fig.update_traces(
         textinfo='percent+label',
         textfont=dict(color='#FFFFFF', size=13)
@@ -111,6 +127,7 @@ def criar_fig_turno(df):
     )
     
     return fig
+
 
 
 def criar_fig_br(df):
@@ -404,7 +421,7 @@ def criar_fig_classificacao(df):
     # Dicionário fixo de cores para não depender da ordem da lista
     # Ajuste as chaves com os nomes exatos do seu dataset se forem diferentes:
     mapa_cores = {
-        'Sem Vítimas': '#FF6D00',        # Vermelho Alerta (Maior fatia não fatal)
+        'Sem Vítimas': '#FF5252',        # Vermelho Alerta (Maior fatia não fatal)
         'Com Vítimas Feridas': '#FF1744', # Laranja Alerta (Segunda maior não fatal)
         'Com Vítimas Fatais': '#6baed6'   # Azul padrão
     }
@@ -621,7 +638,7 @@ def renderizar_infografico_dias(df):
             box-shadow: 0px 0px 10px rgba(255, 23, 68, 0.3);
             border-radius: 8px;
             padding: 1px;
-            background: rgba(26, 26, 26, 0.8);
+            background: transparent;
             text-align: center;
             height: 290px;
             width: 600px;
@@ -773,7 +790,7 @@ def criar_fig_top2_causa_dia(df):
         
     with col_legenda:
         st.markdown("""
-            <div style="background: rgba(26, 26, 26, 0.8); padding: 15px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); margin-top: 25px;">
+            <div style="background: transparent; padding: 15px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); margin-top: 25px;">
                 <h5 style="color: #FFFFFF; margin-top: 0; font-size: 17px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 6px;">Legenda das Causas</h5>
                 <p style="font-size: 15px; color: #FFFFFF; margin-bottom: 8px;">
                     <b style="color: #E63946;">■ Causa #1:</b> Principal causador do dia.
