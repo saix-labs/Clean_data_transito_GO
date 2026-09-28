@@ -352,22 +352,28 @@ def criar_kpis_ato2(df):
 
 def criar_fig_tracado(df):
     """
-    Gera gráfico de barras verticais para o Top 7 traçados de via.
+    Gera gráfico de barras verticais para o Top 7 traçados de via com destaque na maior coluna.
     """
     df_tracado = df['tracado_via'].value_counts().head(7).reset_index()
     df_tracado.columns = ['Traçado', 'Total']
+    
+    # Identifica o traçado de via líder e atribui o Vermelho Alerta
+    maior_tracado = df_tracado.iloc[0]['Traçado']
+    cores_tracado = {tracado: '#FF1744' if tracado == maior_tracado else '#1f77b4' for tracado in df_tracado['Traçado']}
     
     fig = px.bar(
         df_tracado,
         x='Traçado',
         y='Total',
         text='Total',
-        color_discrete_sequence=['#1f77b4'] # Azul mantendo o padrão
+        color='Traçado',
+        color_discrete_map=cores_tracado
     )
     
     fig.update_traces(
         textposition='outside',
-        texttemplate='%{text:,}'
+        texttemplate='%{text:,}',
+        textfont=dict(color='#FFFFFF', size=13)
     )
     
     fig.update_layout(
@@ -382,24 +388,26 @@ def criar_fig_tracado(df):
         yaxis=dict(showticklabels=False, tickfont=dict(color='#FFFFFF', size=14))
     )
     
-    # Garante que os rótulos diretos (números/textos sobre as barras ou elementos) fiquem brancos
-    fig.update_traces(
-        textfont=dict(color='#FFFFFF', size=13)
-    )
-    
     return fig
+
 
 
 def criar_fig_classificacao(df):
     """
-    Gera gráfico de rosca (Donut) com rótulos internos, tamanho de fonte 13
-    e paleta de cores azuis padronizada com o modelo.
+    Gera gráfico de rosca (Donut) destacando acidentes não fatais 
+    em tons de vermelho/laranja e mantendo o tom neutro para fatais.
     """
+    # Ordena explicitamente do maior para o menor
     df_class = df['classificacao_acidente'].value_counts().reset_index()
     df_class.columns = ['Classificação', 'Total']
 
-    # Paleta de tons de azul alinhada ao modelo
-    tons_impacto = ['#08306b', '#2171b5', '#6baed6']
+    # Dicionário fixo de cores para não depender da ordem da lista
+    # Ajuste as chaves com os nomes exatos do seu dataset se forem diferentes:
+    mapa_cores = {
+        'Sem Vítimas': '#FF6D00',        # Vermelho Alerta (Maior fatia não fatal)
+        'Com Vítimas Feridas': '#FF1744', # Laranja Alerta (Segunda maior não fatal)
+        'Com Vítimas Fatais': '#6baed6'   # Azul padrão
+    }
 
     fig = px.pie(
         df_class,
@@ -407,16 +415,16 @@ def criar_fig_classificacao(df):
         names='Classificação',
         hole=0.5,
         color='Classificação',
-        color_discrete_sequence=tons_impacto
+        color_discrete_map=mapa_cores
     )
     
-    # Rótulos DENTRO dos blocos, com tamanho 13 e cor branca (igual ao modelo)
+    # Rótulos DENTRO dos blocos, com tamanho 13 e cor branca
     fig.update_traces(
         textinfo='percent+label',
         textposition='inside',
         textfont=dict(
             color='#FFFFFF',  # Branco puro
-            size=13           # Tamanho exatamente igual ao do modelo
+            size=13           # Tamanho padronizado
         )
     )
     
@@ -452,7 +460,7 @@ def criar_fig_causa_funnel(df):
     df_causa['Causa'] = df_causa['Causa'].replace(mapa_causas)
 
     # 3. Gráfico de Funil com azul marinho intenso e vibrante no topo
-    tons_impacto = ['#08306b', '#08519c', '#2171b5', '#4292c6', '#6baed6']
+    tons_impacto = ['#FF1744', '#FF1744', '#2171b5', '#4292c6', '#6baed6']
     
     fig = px.funnel(
         df_causa,
@@ -488,24 +496,30 @@ def criar_fig_causa_funnel(df):
 def criar_fig_tipo_treemap(df):
     """
     Gráfico de Treemap para o Top 5 Tipos de Acidentes.
-    Alinhado com as margens e paleta de azuis do Ato 1.
+    Destaca o maior bloco em Vermelho Alerta e o segundo em Coral.
     """
     # 1. Filtra Top 5
     df_tipo = df['tipo_acidente'].value_counts().head(5).reset_index()
     df_tipo.columns = ['Tipo', 'Total']
 
-    # 2. Gráfico Treemap com escala customizada (escuro no maior, legível nos menores)
-    escala_azuis_impacto = ['#4292c6', '#2171b5', '#08519c', '#08306b']
+    # 2. Mapeamento discreto de cores para os 5 blocos do Treemap
+    # Index 0: Top 1 (Vermelho Alerta)
+    # Index 1: Top 2 (Coral requested #FF5252)
+    # Index 2, 3, 4: Demais posições em azul
+    cores_treemap = ['#FF1744', '#FF5252', '#2171b5', '#4292c6', '#6baed6']
+    
+    # Criamos um mapa de cor associando a categoria exata para garantir a ordem exata
+    mapa_cores = {tipo: cor for tipo, cor in zip(df_tipo['Tipo'], cores_treemap)}
 
     fig = px.treemap(
         df_tipo,
         path=['Tipo'],
         values='Total',
-        color='Total',
-        color_continuous_scale=escala_azuis_impacto
+        color='Tipo',
+        color_discrete_map=mapa_cores
     )
 
-    # Estilização do texto e das bordas dos blocos
+    # 3. Estilização do texto e das bordas dos blocos
     fig.update_traces(
         textinfo="label+value",
         textfont=dict(
@@ -513,25 +527,21 @@ def criar_fig_tipo_treemap(df):
             size=14
         ),
         marker=dict(
+            cornerradius=4,
             line=dict(color='#111827', width=1.5) # Borda escura para destacar cada bloco
         )
     )
 
-    # 3. Ajuste de layout mantendo fundo transparente
+    # 4. Ajuste de layout mantendo fundo transparente
     fig.update_layout(
+        showlegend=False,
         margin=dict(t=20, b=20, l=10, r=10),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='white'),
-        coloraxis_showscale=False
+        font=dict(color='white')
     )
     
-    fig.update_traces(
-        textinfo="label+value",
-        marker=dict(cornerradius=4)
-    )
     return fig
-
 
 
 
@@ -572,7 +582,7 @@ def obter_dados_causa_dia(df, dia_semana_str):
 
 def renderizar_infografico_dias(df):
     """
-    Renderiza os 7 dias como cards/botões enxutos na esquerda e o painel Neon Cyan na direita.
+    Renderiza os 7 dias como cards/botões enxutos na esquerda e o painel Alerta Vermelho na direita.
     """
     if 'dia_focado' not in st.session_state:
         st.session_state['dia_focado'] = 'Segunda-Feira'
@@ -601,27 +611,25 @@ def renderizar_infografico_dias(df):
         }
 
         div.stButton > button:hover {
-            border-color: #00F3FF !important;
-            color: #00F3FF !important;
+            border-color: #FF1744 !important;
+            color: #FF1744 !important;
         }
 
-        /* Painel Neon Cyan proporcional aos 7 botões */
+        /* Painel Alerta Vermelho proporcional aos 7 botões */
         .painel-neon-box {
-        border: 1.5px solid #00F3FF;
-        box-shadow: 0px 0px 10px rgba(0, 243, 255, 0.25);
-        border-radius: 8px;
-        padding: 1px;
-        background: rgba(10, 25, 47, 0.6);
-        text-align: center;
-        height: 290px;
-    
-        width: 600px; /* <--- ESTA É A LINHA DA LARGURA! */
-        margin: 0 auto; /* Centraliza a caixa na coluna se ela for menor */
-    
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
+            border: 1.5px solid #FF1744;
+            box-shadow: 0px 0px 10px rgba(255, 23, 68, 0.3);
+            border-radius: 8px;
+            padding: 1px;
+            background: rgba(26, 26, 26, 0.8);
+            text-align: center;
+            height: 290px;
+            width: 600px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
         .btn-scroll-container {
@@ -635,10 +643,10 @@ def renderizar_infografico_dias(df):
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            border: 1.5px solid #00F3FF;
-            box-shadow: 0 0 6px rgba(0, 243, 255, 0.4);
+            border: 1.5px solid #FF1744;
+            box-shadow: 0 0 6px rgba(255, 23, 68, 0.4);
             background: transparent;
-            color: #00F3FF;
+            color: #FF1744;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -649,12 +657,10 @@ def renderizar_infografico_dias(df):
     """, unsafe_allow_html=True)
 
     st.subheader("Análise Detalhada: Causa Principal por Dia")
-    st.markdown('<div style="margin-bottom: 15px;"></div>', unsafe_allow_html=True)  # Espaçador vertical de 15px
+    st.markdown('<div style="margin-bottom: 15px;"></div>', unsafe_allow_html=True)
 
-    # Coluna 1 justa (0.7) e Coluna 2 (1.3)
     col_cards, col_painel = st.columns([0.4, 1])
 
-    # Coluna Esquerda: 7 botões/cards
     with col_cards:
         for dia in dias_exibicao:
             is_ativo = (st.session_state['dia_focado'] == dia)
@@ -664,30 +670,28 @@ def renderizar_infografico_dias(df):
                 st.session_state['dia_focado'] = dia
                 st.rerun()
 
-    # Coluna Direita: Painel Neon Cyan
     with col_painel:
         dia_atual = st.session_state['dia_focado']
         dados_dia = obter_dados_causa_dia(df, dia_atual)
         
         st.markdown(f"""
             <div class="painel-neon-box">
-                <h4 style="color: #00F3FF; margin: 0; font-size: 26px;">{dia_atual}</h4>
+                <h4 style="color: #FF1744; margin: 0; font-size: 26px;">{dia_atual}</h4>
                 <div style="font-size: 18px; color: #A0AEC0; margin-top: 2px; margin-bottom: 8px;">
                     Total do dia: <b style="color: #FFFFFF;">{dados_dia['total']:,} acidentes</b>
                 </div>
-                <hr style="border: 0.5px solid rgba(0, 243, 255, 0.2); width: 85%; margin: 2px 0 8px 0;">
+                <hr style="border: 0.5px solid rgba(255, 23, 68, 0.3); width: 85%; margin: 2px 0 8px 0;">
                 <div style="font-size: 15px; color: #A0AEC0; text-transform: uppercase; letter-spacing: 0.8px;">Causa #1 Mais Frequente</div>
                 <div style="font-size: 21px; color: #FFFFFF; font-weight: bold; margin: 4px 0;">
                     {dados_dia['causa_top1']}
                 </div>
-                <div style="font-size: 27px; color: #00F3FF; font-weight: bold; margin-top: 2px;">
+                <div style="font-size: 27px; color: #FF1744; font-weight: bold; margin-top: 2px;">
                     {dados_dia['pct_top1']:.1f}%
                     <span style="font-size: 15px; color: #A0AEC0; font-weight: normal;">dos acidentes</span>
                 </div>
             </div>
         """, unsafe_allow_html=True)
 
-    # Botão de scroll compacto logo abaixo
     st.markdown("""
         <div class="btn-scroll-container">
             <a href="#grafico-barras-dias" style="text-decoration: none;">
@@ -698,11 +702,8 @@ def renderizar_infografico_dias(df):
         </div>
     """, unsafe_allow_html=True)
 
-    
-    #ESPAÇADOR ENTRE OS DOIS GRAFICOS
     st.markdown('<div style="height: 200px; display: block; clear: both;"></div>', unsafe_allow_html=True)
-
-
+    
 
 def criar_fig_top2_causa_dia(df):
     """
@@ -728,7 +729,7 @@ def criar_fig_top2_causa_dia(df):
     df_top2_dia['dia_semana'] = pd.Categorical(df_top2_dia['dia_semana'], categories=ordem_dias, ordered=True)
     df_top2_dia = df_top2_dia.sort_values('dia_semana')
 
-    # 3. Criação do gráfico agrupado no Plotly
+    # 3. Criação do gráfico agrupado no Plotly (Tons Quentes Foscos de Igual Importância)
     fig = px.bar(
         df_top2_dia,
         x='dia_semana',
@@ -738,8 +739,8 @@ def criar_fig_top2_causa_dia(df):
         text='Total',
         custom_data=['causa_acidente'],
         color_discrete_map={
-            'Causa #1': 'rgba(0, 243, 255, 0.75)',
-            'Causa #2': 'rgba(0, 119, 182, 0.85)'
+            'Causa #1': '#E63946',  # Vermelho Coral Fosco (Alerta Principal)
+            'Causa #2': '#F4A261'   # Laranja Queimado/Terracota (Alerta Secundário)
         }
     )
     
@@ -772,21 +773,20 @@ def criar_fig_top2_causa_dia(df):
         
     with col_legenda:
         st.markdown("""
-            <div style="background: rgba(10, 25, 47, 0.6); padding: 15px; border-radius: 8px; border: 1px solid rgba(0, 243, 255, 0.3); margin-top: 25px;">
-                <h5 style="color: #00F3FF; margin-top: 0; font-size: 17px;">Legenda das Causas</h5>
-                <p style="font-size: 16px; color: #FFFFFF; margin-bottom: 8px;">
-                    <b style="color: #00F3FF;">■ Causa #1:</b> Principal causador do dia.
+            <div style="background: rgba(26, 26, 26, 0.8); padding: 15px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); margin-top: 25px;">
+                <h5 style="color: #FFFFFF; margin-top: 0; font-size: 17px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 6px;">Legenda das Causas</h5>
+                <p style="font-size: 15px; color: #FFFFFF; margin-bottom: 8px;">
+                    <b style="color: #E63946;">■ Causa #1:</b> Principal causador do dia.
                 </p>
                 <p style="font-size: 14px; color: #FFFFFF; margin-bottom: 8px;">
-                    <b style="color: #0077B6;">■ Causa #2:</b> Segunda maior ocorrência no mesmo dia.
+                    <b style="color: #F4A261;">■ Causa #2:</b> Segunda maior ocorrência no mesmo dia.
                 </p>
-                <hr style="border: 0.5px solid rgba(0, 243, 255, 0.2); margin: 10px 0;">
-                <p style="font-size: 14px; color: #A0AEC0; margin: 0;">
+                <hr style="border: 0.5px solid rgba(255, 255, 255, 0.1); margin: 10px 0;">
+                <p style="font-size: 13px; color: #A0AEC0; margin: 0;">
                     Passe o mouse sobre as barras para ver a causa exata em cada dia.
                 </p>
             </div>
         """, unsafe_allow_html=True)
-
 
 
 
