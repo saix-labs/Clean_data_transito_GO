@@ -426,6 +426,31 @@ def criar_kpis_ato2(df):
         st.subheader("Top Traçados da Via")
         st.plotly_chart(criar_fig_tracado(df), use_container_width=True)
 
+    st.markdown("""
+                        <div style="
+                            background: transparent; 
+                            border: 1.5px solid #FFFFFF; 
+                            border-radius: 8px; 
+                            padding: 16px 20px; 
+                            margin-top: -160px; 
+                            margin-bottom: 25px; 
+                            text-align: center;
+                        ">
+                            <p style="
+                                color: #FFFFFF; 
+                                font-size: 15px; 
+                                line-height: 1.6; 
+                                margin: 0;
+                                font-weight: 400;
+                            ">
+                                 A análise do traçado demonstra que a imensa maioria dos sinistros 
+                                 se concentra em trechos retos. Quanto à gravidade, sobressaem as 
+                                 ocorrências com vítimas feridas e danos materiais, revelando um 
+                                 padrão de altíssima frequência e gravidade moderada, porém constante.
+                            </p>
+                        </div>
+                    """, unsafe_allow_html=True)
+
     with col2:
         st.subheader("Classificação dos Acidentes")
         st.plotly_chart(criar_fig_classificacao(df), use_container_width=True)
@@ -435,9 +460,37 @@ def criar_kpis_ato2(df):
     # --- LINHA 2 DE GRÁFICOS: CAUSAS E TIPOS ---
     col3, col4 = st.columns(2)
 
+    st.markdown("""
+                                <div style="
+                                    background: transparent; 
+                                    border: 1.5px solid #FFFFFF; 
+                                    border-radius: 8px; 
+                                    padding: 16px 20px; 
+                                    margin-top: -160px; 
+                                    margin-bottom: 25px; 
+                                    text-align: center;
+                                ">
+                                    <p style="
+                                        color: #FFFFFF; 
+                                        font-size: 15px; 
+                                        line-height: 1.6; 
+                                        margin: 0;
+                                        font-weight: 400;
+                                    ">
+                                         O topo das causas é dominado pela Reação Tardia ou Ineficiente
+                                           e pela Ausência de Reação — reflexos diretos da desatenção,
+                                             fadiga ou distração ao volante. Essa perda de foco materializa-se
+                                               na dinâmica dos impactos, liderada pela Saída de Leito Carroçável 
+                                               (perda de controle por distração) e pela Colisão Traseira 
+                                               (falta de reação ou distância inadequada).
+                                    </p>
+                                </div>
+                            """, unsafe_allow_html=True)
+
     with col3:
         st.subheader("Top 5 Causas de Acidentes")
         st.plotly_chart(criar_fig_causa_funnel(df), use_container_width=True)
+
 
     with col4:
         st.subheader("Top 5 Tipos de Acidentes")
@@ -731,7 +784,7 @@ def renderizar_infografico_dias(df):
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-top: 4px;
+            margin-top: -100px;
             margin-bottom: 4px;
         }
         .btn-scroll-circle {
@@ -882,6 +935,33 @@ def criar_fig_top2_causa_dia(df):
                 </p>
             </div>
         """, unsafe_allow_html=True)
+
+    st.markdown("""
+                                        <div style="
+                                            background: transparent; 
+                                            border: 1.5px solid #FFFFFF; 
+                                            border-radius: 8px; 
+                                            padding: 16px 20px; 
+                                            margin-top: -160px; 
+                                            margin-bottom: 25px; 
+                                            text-align: center;
+                                        ">
+                                            <p style="
+                                                color: #FFFFFF; 
+                                                font-size: 15px; 
+                                                line-height: 1.6; 
+                                                margin: 0;
+                                                font-weight: 400;
+                                            ">
+                                                 O cruzamento entre causas e dias da semana confirma que o fator
+                                                   comportamental se mantém como o vetor de risco dominante de segunda a sábado.
+                                                     No domingo, embora a ingestão de álcool assuma a liderança,
+                                                       a ausência de reação ou distração permanece firmemente como
+                                                         a segunda maior causa, provando que a perda de foco do condutor
+                                                           é um problema transversal e permanente.
+                                            </p>
+                                        </div>
+                                    """, unsafe_allow_html=True)
 
 
 
