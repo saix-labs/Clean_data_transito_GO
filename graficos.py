@@ -7,8 +7,20 @@ from estilos import aplicar_estilos
 
 
 def criar_kpis_ato1(df):
+    # O título da sua tela central
     st.title("O Panorama da Acidentalidade em Goiás")
-    st.markdown("---")
+
+    # O subtítulo com a quebra de linha forçada e design alinhado ao seu tema escuro
+    st.markdown(
+        """
+        <div style='text-align: left; color: #A0AEC0; font-size: 15px; margin-top: -10px; margin-bottom: 20px;'>
+            Sinistros em Rodovias Federais (BR-GO)<br>
+            <span style='color: #FF1744; font-weight: bold;'>Análise do Biênio: 2024 – 2025</span>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
     
         # --- CSS EXCLUSIVO DO ATO 1 ---
     # 1. Espaçamento entre as linhas de blocos padronizado
