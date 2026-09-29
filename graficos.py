@@ -9,6 +9,20 @@ from estilos import aplicar_estilos
 def criar_kpis_ato1(df):
     st.title("O Panorama da Acidentalidade em Goiás")
     st.markdown("---")
+    
+        # --- CSS EXCLUSIVO DO ATO 1 ---
+    # 1. Espaçamento entre as linhas de blocos padronizado
+    st.markdown(
+        """
+        <style>
+            div[data-testid="stHorizontalBlock"] {
+                margin-bottom: 10rem !important;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
 
     # --- CARDS DE KPI (TOPO) ---
     total_acidentes = len(df)
@@ -55,7 +69,7 @@ def criar_kpis_ato1(df):
             border: 1.5px solid #FFFFFF; 
             border-radius: 8px; 
             padding: 16px 20px; 
-            margin-top: -50px; 
+            margin-top: -160px; 
             margin-bottom: 25px; 
             text-align: center;
         ">
@@ -74,8 +88,7 @@ def criar_kpis_ato1(df):
         </div>
 """, unsafe_allow_html=True)
 
-    # --- ESPAÇADOR DE TELA (Garante o isolamento da Linha 1 no F11) ---
-    st.markdown("<div style='margin-bottom: 35vh;'></div>", unsafe_allow_html=True)
+    
 
     # --- LINHA 2: TIPO DE PISTA E CONDIÇÃO METEOROLÓGICA ---
     with st.container():
@@ -96,7 +109,7 @@ def criar_kpis_ato1(df):
             border: 1.5px solid #FFFFFF; 
             border-radius: 8px; 
             padding: 16px 20px; 
-            margin-top: -50px; 
+            margin-top: -160px; 
             margin-bottom: 25px; 
             text-align: center;
         ">
@@ -136,7 +149,7 @@ def criar_kpis_ato1(df):
                         border: 1.5px solid #FFFFFF; 
                         border-radius: 8px; 
                         padding: 16px 20px; 
-                        margin-top: -70px; 
+                        margin-top: -160px; 
                         margin-bottom: 25px; 
                         text-align: center;
                     ">
@@ -380,7 +393,7 @@ def criar_kpis_ato2(df):
         """
         <style>
             div[data-testid="stHorizontalBlock"] {
-                margin-bottom: 4rem !important;
+                margin-bottom: 10rem !important;
             }
             div[data-testid="stColumn"]:nth-child(3) [data-testid="stMetricValue"] {
                 font-size: 1.05rem !important;
