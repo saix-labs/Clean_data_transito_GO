@@ -1567,16 +1567,17 @@ def renderizar_secao_mapa_hotspots_interativo(df):
             is_pendular = opcao_filtro == 'Janela Crítica (16h-20h)'
 
             if is_pendular:
-                # Extrai hora e minuto para garanta a janela exata (16:00:00 até 20:00:00)
-                hora_num = pd.to_numeric(df_temp['horario'].astype(str).str.split(':').str[0], errors='coerce')
-                min_num = pd.to_numeric(df_temp['horario'].astype(str).str.split(':').str[1], errors='coerce')
+                # 1. Padroniza a string de horário retirando espaços nas pontas
+                df_temp["horario_limpo"] = df_temp["horario"].astype(str).str.strip()
 
-                # Pega as horas 16, 17, 18, 19 + o minuto exato das 20:00
-                filtro_pico = ((hora_num >= 16) & (hora_num < 20)) | ((hora_num == 20) & (min_num == 0))
+                # 2. Filtro cirúrgico completo: inclui desde 16:00:00 até exatas 20:00:00 com segundos
+                # Qualquer registro a partir de 20:00:01 cai no falso e fica de fora automaticamente
+                filtro_pico = (df_temp["horario_limpo"] >= "16:00:00") & (df_temp["horario_limpo"] <= "20:00:00")
                 
                 df_filtrado = df_temp[filtro_pico]
             else:
                 df_filtrado = df_temp
+
 
 # ==============================================================================
     # BLOCO 4: AGRUPAMENTO EM TRECHOS DE 5 KM E FATORES DOMINANTES
@@ -1659,20 +1660,33 @@ def renderizar_secao_mapa_hotspots_interativo(df):
     # ==============================================================================
     with col_controle:
             if is_pendular and not df_filtrado.empty:
-                # Causa #1 Global (com %)
-                causas_validas = df_filtrado[
-                    df_filtrado['causa_acidente'].dropna().astype(str).str.strip().str.lower() != 'não informado'
+                # 1. Garante que os horários estão como string sem espaços extras
+                df_temp_causa = df_filtrado.copy()
+                df_temp_causa["horario_limpo"] = df_temp_causa["horario"].astype(str).str.strip()
+                
+                # 2. Filtro cirúrgico com segundos para isolar estritamente o período pendular
+                df_janela_causa = df_temp_causa[
+                    (df_temp_causa["horario_limpo"] >= "16:00:00") & 
+                    (df_temp_causa["horario_limpo"] <= "20:00:00")
+                ]
+
+                # Causa #1 Global (com %) usando apenas os dados da janela crítica filtrada
+                causas_validas = df_janela_causa[
+                    df_janela_causa['causa_acidente'].dropna().astype(str).str.strip().str.lower() != 'não informado'
                 ]['causa_acidente']
                 
                 if not causas_validas.empty:
                     top_causa_nome = causas_validas.value_counts().index[0].title()
                     top_causa_qtd = causas_validas.value_counts().iloc[0]
-                    pct_causa = (top_causa_qtd / len(causas_validas)) * 100
+                    
+                    # Calcula o percentual aplicando o truncamento exato de uma casa decimal
+                    pct_causa = int((top_causa_qtd / len(causas_validas)) * 100 * 10) / 10
                     causa_top1 = f"{top_causa_nome} ({pct_causa:.1f}%)"
                 else:
                     causa_top1 = 'N/A'
 
-                # Tipo #1 Global (com %)
+
+                # Tipo #1 Global (com %) - Ajustado para truncamento matemático exato
                 tipos_validos = df_filtrado[
                     df_filtrado['tipo_acidente'].dropna().astype(str).str.strip().str.lower() != 'não informado'
                 ]['tipo_acidente']
@@ -1680,13 +1694,16 @@ def renderizar_secao_mapa_hotspots_interativo(df):
                 if not tipos_validos.empty:
                     top_tipo_nome = tipos_validos.value_counts().index[0].title()
                     top_tipo_qtd = tipos_validos.value_counts().iloc[0]
-                    pct_tipo = (top_tipo_qtd / len(tipos_validos)) * 100
+                    
+                    # Aplica o mesmo truncamento matemático de uma casa decimal (força o padrão do dashboard)
+                    pct_tipo = int((top_tipo_qtd / len(tipos_validos)) * 100 * 10) / 10
                     tipo_top1 = f"{top_tipo_nome} ({pct_tipo:.1f}%)"
                 else:
                     tipo_top1 = 'N/A'
 
+
                 
-                                # Sentido % Global (Ajustado para duas casas decimais truncadas para alinhar com KPI e gráfico)
+                # Sentido % Global (Ajustado para duas casas decimais truncadas para alinhar com KPI e gráfico)
                 df_sentidos = df_filtrado.copy()
                 total_sent = len(df_sentidos)
 

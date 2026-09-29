@@ -589,3 +589,107 @@ print(f"Total de Trechos Críticos Encontrados: {len(trechos_criticos)}")
 print("=" * 65)
 
 # %%
+
+
+
+
+
+# %%
+import pandas as pd
+
+# 1. Cria uma cópia e padroniza a string de horário
+df_valida = df.copy()
+df_valida["horario_limpo"] = df_valida["horario"].astype(str).str.strip()
+
+# 2. Filtro cirúrgico com segundos: das 16:00:00 até exatas 20:00:00 cravadas
+df_pico = df_valida[
+    (df_valida["horario_limpo"] >= "16:00:00")
+    & (df_valida["horario_limpo"] <= "20:00:00")
+].copy()
+
+# 3. Remove "Não Informado" e nulos da coluna de causas (igualzinho faz o seu card)
+causas_limpas = (
+    df_pico["causa_acidente"].fillna("").astype(str).str.strip().str.lower()
+)
+df_causas_validas = df_pico[
+    (causas_limpas != "não informado") & (causas_limpas != "")
+]
+
+# 4. Calcula o ranking e as porcentagens
+if not df_causas_validas.empty:
+    contagem_causas = df_causas_validas["causa_acidente"].value_counts()
+    total_causas_validas = len(df_causas_validas)
+
+    # Pega os dados do Top 1
+    top_causa_nome = contagem_causas.index[0]
+    top_causa_qtd = contagem_causas.iloc[0]
+
+    # Percentual bruto e truncado
+    pct_bruto = (top_causa_qtd / total_causas_validas) * 100
+    pct_truncado = int(pct_bruto * 10) / 10
+
+    # Exibe no console
+    print("=" * 65)
+    print("📊 ANÁLISE DE CAUSAS NO PERÍODO PENDULAR (16h às 20h00)")
+    print("=" * 65)
+    print(f"Total de acidentes com causas válidas na janela: {total_causas_validas}")
+    print(f"Causa #1 Principal: {top_causa_nome}")
+    print(f"Quantidade de ocorrências: {top_causa_qtd}")
+    print(f"Porcentagem Bruta: {pct_bruto:.3f}%")
+    print(f"Porcentagem Truncada (1 casa): {pct_truncado:.1f}%")
+    print("=" * 65)
+else:
+    print("Nenhuma causa válida encontrada no período.")
+
+# %%
+
+
+
+# %%
+import pandas as pd
+
+# 1. Cria uma cópia e padroniza a string de horário
+df_valida = df.copy()
+df_valida["horario_limpo"] = df_valida["horario"].astype(str).str.strip()
+
+# 2. Filtro cirúrgico com segundos: das 16:00:00 até exatas 20:00:00 cravadas
+df_pico = df_valida[
+    (df_valida["horario_limpo"] >= "16:00:00")
+    & (df_valida["horario_limpo"] <= "20:00:00")
+].copy()
+
+# 3. Remove "Não Informado" e nulos da coluna de tipos (igualzinho faz o seu card)
+tipos_limpos = (
+    df_pico["tipo_acidente"].fillna("").astype(str).str.strip().str.lower()
+)
+df_tipos_validos = df_pico[
+    (tipos_limpos != "não informado") & (tipos_limpos != "")
+]
+
+# 4. Calculates o ranking e as porcentagens
+if not df_tipos_validos.empty:
+    contagem_tipos = df_tipos_validos["tipo_acidente"].value_counts()
+    total_tipos_validos = len(df_tipos_validos)
+
+    # Pega os dados do Top 1
+    top_tipo_nome = contagem_tipos.index[0]
+    top_tipo_qtd = contagem_tipos.iloc[0]
+
+    # Percentual bruto e truncado
+    pct_bruto = (top_tipo_qtd / total_tipos_validos) * 100
+    pct_truncado = int(pct_bruto * 10) / 10
+
+    # Exibe no console
+    print("=" * 65)
+    print("📊 ANÁLISE DE TIPOS NO PERÍODO PENDULAR (16h às 20h00)")
+    print("=" * 65)
+    print(f"Total de acidentes com tipos válidos na janela: {total_tipos_validos}")
+    print(f"Tipo #1 Principal: {top_tipo_nome}")
+    print(f"Quantidade de ocorrências: {top_tipo_qtd}")
+    print(f"Porcentagem Bruta: {pct_bruto:.3f}%")
+    print(f"Porcentagem Truncada (1 casa): {pct_truncado:.1f}%")
+    print("=" * 65)
+else:
+    print("Nenhum tipo válido encontrado no período.")
+
+# %%
