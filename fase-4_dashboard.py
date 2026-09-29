@@ -75,12 +75,8 @@ elif pagina == "Ato 3: Análise Temporal e Solução":
     # 1. Renderiza os cartões de KPIs
     criar_kpis_ato3(df)
     
-    # 2. Título e chamada do Gráfico de Acidentes por Hora (Largura Total)
-    st.subheader("Distribuição do Volume de Acidentes por Hora do Dia")
+    criar_fig_acidentes_por_hora(df)
     
-    fig_hora = criar_fig_acidentes_por_hora(df)
-    st.plotly_chart(fig_hora, use_container_width=True)
-
     # 3. Chamada da Seção de Sentido da Via (Barras Bipolares + Card Explicativo em 2 Colunas)
     renderizar_secao_sentido_via(df)
 

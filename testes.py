@@ -448,3 +448,144 @@ df = pd.read_csv('acidentes-GO-2024_2025_limpo.csv')
 # print("=" * 65)
 
 # # %%
+
+
+
+
+
+
+#%%
+import pandas as pd
+
+# 1. Garante que a coluna de horário está no formato string limpo (HH:MM:SS ou HH:MM)
+# Se a sua coluna já for string, isso apenas padroniza os dados
+df["horario_str"] = df["horario"].astype(str).str.strip()
+
+# 2. Aplica o filtro ultra-estrito: das 16:00:00 até as 20:00:00 cravadas
+# Isso garante que 16:00 entra, 19:59 entra, 20:00 entra, mas 20:01 fica de fora
+df_pico_estrito = df[
+    (df["horario_str"] >= "16:00") & (df["horario_str"] <= "20:00")
+]
+
+# 3. Faz a contagem por sentido da via
+contagem_sentido = df_pico_estrito["sentido_via"].value_counts()
+
+# 4. Exibe os resultados detalhados no console
+print("=" * 50)
+print("ACIDENTES NO PERÍODO PENDULAR CRÍTICO (16h às 20h00)")
+print("=" * 50)
+print(contagem_sentido)
+print("-" * 50)
+print(f"Total Geral no Período: {df_pico_estrito.shape[0]} acidentes")
+print("=" * 50)
+
+# %%
+
+
+
+
+df.info()
+# %%
+
+
+df.dtypes
+# %%
+
+
+df['sentido_via'].value_counts
+# %%
+
+
+
+# %%
+import pandas as pd
+
+# 1. Garante que os horários estão como string sem espaços extras nas pontas
+df["horario_limpo"] = df["horario"].astype(str).str.strip()
+
+# 2. Filtro cirúrgico: inclui tudo de 16:00:00 até exatas 20:00:00
+# (Qualquer registro a partir de 20:00:01 fica fora automaticamente)
+df_faixa_pendular = df[
+    (df["horario_limpo"] >= "16:00:00") & (df["horario_limpo"] <= "20:00:00")
+]
+
+# 3. Contagem exata por sentido da via
+contagem_sentido = df_faixa_pendular["sentido_via"].value_counts()
+
+# 4. Exibição dos resultados no console
+print("=" * 60)
+print("📊 OCORRÊNCIAS POR SENTIDO NA FAIXA PENDULAR (16h às 20h00)")
+print("=" * 60)
+print(contagem_sentido)
+print("-" * 60)
+print(f"Total Geral no Período: {df_faixa_pendular.shape[0]} acidentes")
+print("=" * 60)
+
+# %%
+
+
+
+
+# %%
+# O total geral do período crítico é 1723
+total_periodo = 1723
+
+# Valores retornados no seu terminal
+valores = {"Crescente": 969, "Decrescente": 749, "Não Informado": 5}
+
+print("=" * 50)
+print("📊 PORCENTAGEM POR SENTIDO NO PERÍODO CRÍTICO")
+print("=" * 50)
+for sentido, qtd in valores.items():
+    porcentagem = (qtd / total_periodo) * 100
+    print(f"• {sentido}: {porcentagem:.2f}% ({qtd} acidentes)")
+print("=" * 50)
+
+# %%
+
+
+
+
+# %%
+import pandas as pd
+
+# Copia a base para evitar alterações no df original
+df_valida = df.copy()
+
+# 1. Padroniza a string de horário retirando espaços nas pontas
+df_valida["horario_limpo"] = df_valida["horario"].astype(str).str.strip()
+
+# 2. Filtro cirúrgico com segundos (16:00:00 até exatas 20:00:00)
+# (Qualquer ocorrência a partir de 20:00:01 é ignorada)
+df_pico = df_valida[
+    (df_valida["horario_limpo"] >= "16:00:00")
+    & (df_valida["horario_limpo"] <= "20:00:00")
+].copy()
+
+# 3. Tratamento e agrupamento por KMs (Janelas de 5 km)
+df_pico["km_num"] = pd.to_numeric(df_pico["km"], errors="coerce")
+# O operador // faz a divisão inteira (ex: KM 14 // 5 = 2 -> 2 * 5 = Trecho do KM 10)
+df_pico["trecho_5km"] = (df_pico["km_num"] // 5) * 5
+
+# 4. Agrupamento por BR e Trecho de 5km, contando os acidentes
+trechos_agrupados = (
+    df_pico.groupby(["br", "trecho_5km"])
+    .size()
+    .reset_index(name="total_acidentes")
+)
+
+# 5. Filtra apenas os trechos com 10 ou mais acidentes
+trechos_criticos = trechos_agrupados[
+    trechos_agrupados["total_acidentes"] >= 10
+].sort_values(by="total_acidentes", ascending=False)
+
+# 6. Exibe os resultados no console
+print("=" * 65)
+print(f"📊 TRECHOS CRÍTICOS (10+ ACIDENTES) - 16h às 20h00")
+print("=" * 65)
+print(trechos_criticos.to_string(index=False))
+print("-" * 65)
+print(f"Total de Trechos Críticos Encontrados: {len(trechos_criticos)}")
+print("=" * 65)
+
+# %%

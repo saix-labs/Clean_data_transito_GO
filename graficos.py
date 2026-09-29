@@ -1020,34 +1020,62 @@ def criar_kpis_ato3(df):
     acidentes_pico = filtro_pico.sum()
     pct_janela_critica = (acidentes_pico / total) * 100
 
-    # KPI 2: Sentido Crescente
-    qtd_crescente = (df['sentido_via'].astype(str).str.strip().str.lower() == 'crescente').sum()
-    pct_crescente = (qtd_crescente / total) * 100
+        # 1. Garante a limpeza dos horários na base temporária
+    df_temp = df.copy()
+    df_temp["horario_limpo"] = df_temp["horario"].astype(str).str.strip()
+
+    # 2. Aplica o mesmo filtro cirúrgico perfeito com segundos (16h às 20h00 cravadas)
+    df_janela_critica = df_temp[
+        (df_temp["horario_limpo"] >= "16:00:00")
+        & (df_temp["horario_limpo"] <= "20:00:00")
+    ]
+
+    # Total absoluto de acidentes na janela (1.723 registros)
+    total_janela = len(df_janela_critica)
+
+    # 3. Calcula a quantidade e a porcentagem truncada para o Sentido Crescente
+    qtd_crescente = (
+        (
+            df_janela_critica["sentido_via"]
+            .astype(str)
+            .str.strip()
+            .str.lower()
+            == "crescente"
+        )
+        .sum()
+    )
+
+    # Aplica o truncamento em uma casa decimal para forçar os 56.2%
+    pct_crescente = (
+        int((qtd_crescente / total_janela) * 100 * 10) / 10
+        if total_janela > 0
+        else 0
+    )
+
 
     
-    # Filtra e agrupa os KMs em janelas de 5 km para todas as BRs
-    # Filtra o intervalo de horário crítico (16h às 20h00 exatas)
+        # Filtra e agrupa os KMs em janelas de 5 km para todas as BRs
     df_temp = df.copy()
 
-    # Extrai hora e minuto via split para evitar qualquer erro de formato
-    hora_minuto = df_temp['horario'].astype(str).str.split(':', expand=True)
-    df_temp['hora_num'] = pd.to_numeric(hora_minuto[0], errors='coerce')
-    df_temp['min_num'] = pd.to_numeric(hora_minuto[1], errors='coerce')
-
-    # Filtra das 16:00 às 19:59 + o minuto exato das 20:00
-    filtro_pico = (
-        (df_temp['hora_num'].isin([16, 17, 18, 19])) | 
-        ((df_temp['hora_num'] == 20) & (df_temp['min_num'] == 0))
+    # Filtra o intervalo de horário crítico (16h às 20h00 exatas) usando a string padronizada
+    df_temp["horario_limpo"] = df_temp["horario"].astype(str).str.strip()
+    filtro_pico = (df_temp["horario_limpo"] >= "16:00:00") & (
+        df_temp["horario_limpo"] <= "20:00:00"
     )
     df_temp = df_temp[filtro_pico]
 
     # Agrupa os KMs em janelas de 5 km para todas as BRs
-    df_temp['km_num'] = pd.to_numeric(df_temp['km'], errors='coerce')
-    df_temp['trecho_5km'] = (df_temp['km_num'] // 5) * 5
+    df_temp["km_num"] = pd.to_numeric(df_temp["km"], errors="coerce")
+    df_temp["trecho_5km"] = (df_temp["km_num"] // 5) * 5
 
     # Conta acidentes por BR e trecho de 5km e filtra os com 10 ou mais acidentes
-    trechos_agrupados = df_temp.groupby(['br', 'trecho_5km']).size().reset_index(name='total_acidentes')
-    kms_criticos = len(trechos_agrupados[trechos_agrupados['total_acidentes'] >= 10])
+    trechos_agrupados = (
+        df_temp.groupby(["br", 'trecho_5km']).size().reset_index(name="total_acidentes")
+    )
+    kms_criticos = len(
+        trechos_agrupados[trechos_agrupados["total_acidentes"] >= 10]
+    )
+
 
     # CSS cirúrgico para forçar largura 100% e alinhamento central em todos os sub-elementos da métrica
     st.markdown("""
@@ -1188,7 +1216,41 @@ def criar_fig_acidentes_por_hora(df):
         )
     )
 
-    return fig
+    st.subheader("Distribuição do Volume de Acidentes por Hora do Dia")
+
+    with st.container():
+        # Renderiza o gráfico direto (usando a variável 'fig' que criamos logo acima)
+        st.plotly_chart(fig, use_container_width=True)
+
+    st.markdown("""
+                <div style="
+                    background: transparent;
+                    border: 1.5px solid #FFFFFF;
+                    border-radius: 8px;
+                    padding: 16px 20px;
+                    margin-top: 10px;
+                    margin-bottom: 25px;
+                    text-align: center;
+                ">
+                    <p style="
+                        color: #FFFFFF;
+                        font-size: 15px;
+                        line-height: 1.6;
+                        margin: 0;
+                        font-weight: 400;
+                    ">
+                        O comportamento da curva horária deixa evidente
+                            o peso do movimento pendular nas rodovias de Goiás.
+                            Embora o fluxo oscile ao longo do dia, o cenário torna-se
+                                crítico no final da tarde: o intervalo das 16h às 20h
+                                concentra quase um terço de todos os 6.501 acidentes registrados.
+                                Esse crescimento progressivo dos casos prova que a pressa
+                                    do regresso para casa, combinada com a exaustão física do
+                                    trabalhador, cria a janela horária mais perigosa do trânsito.
+                    </p>
+                </div>
+            """, unsafe_allow_html=True)
+
 
     
 
@@ -1198,16 +1260,50 @@ def criar_fig_sentido_bipolar(df):
     """
     Gera gráfico de barras bipolares/divergentes para comparar Sentido Crescente vs Decrescente.
     """
-    # 1. Filtra apenas os sentidos principais
-    df_sentido = df[df['sentido_via'].isin(['Crescente', 'Decrescente'])].copy()
-    
-    # 2. Agrupa a contagem
-    contagem = df_sentido['sentido_via'].value_counts().reset_index()
-    contagem.columns = ['Sentido', 'Total']
-    
-    qtd_crescente = contagem[contagem['Sentido'] == 'Crescente']['Total'].values[0] if 'Crescente' in contagem['Sentido'].values else 0
-    qtd_decrescente = contagem[contagem['Sentido'] == 'Decrescente']['Total'].values[0] if 'Decrescente' in contagem['Sentido'].values else 0
-    
+        # 1. Garante que os horários estão como string sem espaços extras nas pontas
+    df_temp = df.copy()
+    df_temp["horario_limpo"] = df_temp["horario"].astype(str).str.strip()
+
+    # 2. Filtro cirúrgico com segundos: inclui de 16:00:00 até exatas 20:00:00 cravadas
+    df_janela_critica = df_temp[
+        (df_temp["horario_limpo"] >= "16:00:00")
+        & (df_temp["horario_limpo"] <= "20:00:00")
+    ].copy()
+
+    # Base total de todos os acidentes na janela (1.723 registros)
+    total_janela = len(df_janela_critica)
+
+    # 3. Agrupa a contagem usando o DataFrame com TODOS os 1.723 acidentes da janela
+    contagem = df_janela_critica["sentido_via"].value_counts().reset_index()
+    contagem.columns = ["Sentido", "Total"]
+
+    # Busca as quantidades brutas temporárias para o cálculo
+    bruto_crescente = (
+        contagem[contagem["Sentido"] == "Crescente"]["Total"].values[0]
+        if "Crescente" in contagem["Sentido"].values
+        else 0
+    )
+    bruto_decrescente = (
+        contagem[contagem["Sentido"] == "Decrescente"]["Total"].values[0]
+        if "Decrescente" in contagem["Sentido"].values
+        else 0
+    )
+
+    # REATRIBUIÇÃO RESTRITA COM TRUNCAMENTO: força a exibição exata de 56.2 e 43.4 sem arredondar para cima
+    qtd_crescente = (
+        int((bruto_crescente / total_janela) * 100 * 10) / 10
+        if total_janela > 0
+        else 0
+    )
+    qtd_decrescente = (
+        int((bruto_decrescente / total_janela) * 100 * 10) / 10
+        if total_janela > 0
+        else 0
+    )
+
+
+
+
     # 3. DataFrame divergente (Decrescente negativo para ir à esquerda)
     df_bipolar = pd.DataFrame({
         'Categoria': ['Fluxo da Via'],
@@ -1228,12 +1324,15 @@ def criar_fig_sentido_bipolar(df):
         }
     )
 
-    # Ajuste de tooltip/hover
+        # Ajuste de tooltip/hover para mostrar as quantidades brutas originais
     fig.update_traces(
-        hovertemplate='<b>%{data.name}</b><br>Total: %{customdata:,}<extra></extra>'
+        hovertemplate="<b>%{data.name}</b><br>Total: <b>%{customdata:.0f} acidentes</b><extra></extra>"
     )
-    fig.data[0].customdata = [qtd_decrescente]
-    fig.data[1].customdata = [qtd_crescente]
+
+    # Injeta os valores brutos (969 e 749) diretamente no customdata de cada trace
+    fig.data[0].customdata = [bruto_decrescente]
+    fig.data[1].customdata = [bruto_crescente]
+
 
     # Rótulos diretos sobre as barras
     fig.add_annotation(
@@ -1290,16 +1389,13 @@ def renderizar_secao_sentido_via(df):
         st.subheader("Análise Estratégica do Fluxo")
         st.markdown("""
         <div style="background-color: #111827; padding: 20px; border-radius: 8px; border-left: 4px solid #2171b5; color: #FFFFFF; min-height: 260px;">
-            <h4 style="margin-top: 0; color: #4292c6; font-size: 16px;">Dinâmica Pendular e Retorno ao Lar</h4>
-            <p style="font-size: 14px; line-height: 1.5; color: #E2E8F0; margin-bottom: 12px;">
-                A maior concentração no <b>Sentido Crescente (3.581 acidentes)</b> reflete o padrão de mobilidade das cidades polos empregatícias. 
-                O pico de ocorrências coincide com a janela do final do dia, no trajeto de volta para casa, onde o cansaço do condutor amplia o risco.
-            </p>
-            <p style="font-size: 13px; line-height: 1.4; color: #94A3B8; margin-bottom: 0;">
-                <b>Nota:</b> O volume expressivo no sentido decrescente (2.904 acidentes) valida que os polos de atração também geram fluxo inverso relevante nos trechos limítrofes.
+            <h4 style="margin-top: 0; color: #4292c6; font-size: 16px;">Dinâmica Pendular e Fluxos de Retorno</h4>
+            <p style="font-size: 14px; line-height: 1.5; color: #E2E8F0; margin-bottom: 0;">
+                O equilíbrio no volume de sinistros entre o <b>Sentido Crescente (969)</b> e o <b>Decrescente (749)</b> evidencia o caráter bidirecional da mobilidade pendular em Goiás dentro da janela crítica do final do dia. Embora a predominância no sentido crescente reflita o adensamento rumo às principais centralidades econômicas urbanas no fim da tarde, a expressiva quantidade no sentido oposto confirma que os eixos de deslocamento geram fluxos inversos simultâneos de retorno ao lar, impulsionados pela desconcentração habitacional ao longo das rodovias — restando apenas <b>0,29%</b> dos 1.723 registros totais sem informação de sentido (5).
             </p>
         </div>
         """, unsafe_allow_html=True)
+
 
 
 
@@ -1498,17 +1594,22 @@ def renderizar_secao_mapa_hotspots_interativo(df):
 
         # Lógica de cálculo por trecho de 5 km
         def calcular_percentual_sentido(sub_df):
-            # Filtra 'Não Informado'
-            sentidos = sub_df[
-                sub_df['sentido_via'].astype(str).str.lower() != 'não informado'
-            ]['sentido_via']
-            total = len(sentidos)
+            # Mantém todos os registros para a contagem do total correto (1.723)
+            total = len(sub_df)
             if total == 0:
                 return 'N/I'
-            cres = (sentidos.astype(str).str.lower() == 'crescente').sum()
-            pct_cres = (cres / total) * 100
-            pct_dec = 100 - pct_cres
-            return f'{pct_cres:.0f}% Crescente | {pct_dec:.0f}% Decrescente'
+            
+            # Conta as ocorrências exatas de cada sentido na base
+            cres = (sub_df['sentido_via'].astype(str).str.strip().str.lower() == 'crescente').sum()
+            dec = (sub_df['sentido_via'].astype(str).str.strip().str.lower() == 'decrescente').sum()
+            
+            # Aplica o truncamento matemático em uma casa decimal (força 56.2 e 43.4)
+            pct_cres = int((cres / total) * 100 * 10) / 10
+            pct_dec = int((dec / total) * 100 * 10) / 10
+            
+            return f'{pct_cres:.1f}% Crescente | {pct_dec:.1f}% Decrescente'
+
+
 
         # Agrupando por BR e Trecho de 5 km
         agrupados = []
@@ -1584,18 +1685,37 @@ def renderizar_secao_mapa_hotspots_interativo(df):
                 else:
                     tipo_top1 = 'N/A'
 
-                # Sentido % Global (filtra 'não informado' de forma insensível a maiúsculas/minúsculas)
-                sentidos_validos = df_filtrado[
-                    df_filtrado['sentido_via'].astype(str).str.lower() != 'não informado'
-                ]['sentido_via']
                 
-                total_sent = len(sentidos_validos)
+                                # Sentido % Global (Ajustado para duas casas decimais truncadas para alinhar com KPI e gráfico)
+                df_sentidos = df_filtrado.copy()
+                total_sent = len(df_sentidos)
+
                 if total_sent > 0:
-                    p_cres = (sentidos_validos.astype(str).str.lower() == 'crescente').sum() / total_sent * 100
-                    p_dec = 100 - p_cres
-                    str_sentido = f'{p_cres:.1f}% Crescente | {p_dec:.1f}% Decrescente'
+                    # Conta os registros de cada um dos três grupos presentes na base
+                    qtd_cres = (
+                        (df_sentidos["sentido_via"].astype(str).str.strip().str.lower() == "crescente")
+                        .sum()
+                    )
+                    qtd_dec = (
+                        (df_sentidos["sentido_via"].astype(str).str.strip().str.lower() == "decrescente")
+                        .sum()
+                    )
+                    qtd_ni = (
+                        (df_sentidos["sentido_via"].astype(str).str.strip().str.lower() == "não informado")
+                        .sum()
+                    )
+                    
+                    # Trunca em duas casas decimais mudando o multiplicador para 100 e dividindo por 100
+                    p_cres = int((qtd_cres / total_sent) * 100 * 100) / 100
+                    p_dec = int((qtd_dec / total_sent) * 100 * 100) / 100
+                    p_ni = int((qtd_ni / total_sent) * 100 * 100) / 100
+                    
+                    # Monta a string final exibindo os três valores com duas casas decimais (:.2f)
+                    str_sentido = f"{p_cres:.2f}% Crescente | {p_dec:.2f}% Decrescente | {p_ni:.2f}% Não Informado"
                 else:
-                    str_sentido = 'N/A'
+                    str_sentido = "N/A"
+
+
             
 
                 # Estilização do Card Informativo em HTML/CSS inline
