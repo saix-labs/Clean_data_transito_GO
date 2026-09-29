@@ -380,7 +380,7 @@ def criar_kpis_ato2(df):
         """
         <style>
             div[data-testid="stHorizontalBlock"] {
-                margin-bottom: 10rem !important;
+                margin-bottom: 4rem !important;
             }
             div[data-testid="stColumn"]:nth-child(3) [data-testid="stMetricValue"] {
                 font-size: 1.05rem !important;
@@ -1039,7 +1039,7 @@ def criar_kpis_ato3(df):
         """
         <style>
             div[data-testid="stHorizontalBlock"] {
-                margin-bottom: 2rem !important;
+                margin-bottom: 3rem !important; 
             }
         </style>
         """,
