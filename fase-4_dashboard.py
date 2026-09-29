@@ -47,32 +47,32 @@ df = carregar_dados()
 
 # 4. Barra Lateral (Sidebar)
 with st.sidebar:
-    st.title("Painel de Controle")
+    st.title("Navegação")
     st.markdown("---")
-    st.write("Selecione a etapa de análise:")
+    st.write("Escolha o foco da análise:")
 
     # Inicializa a página padrão no estado da sessão caso não exista
     if "pagina" not in st.session_state:
-        st.session_state.pagina = "Ato 1: Panorama Geral"
+        st.session_state.pagina = "Panorama"
 
     # --- CONFIGURAÇÃO INDIVIDUAL DOS BOTÕES ---
     
     # Botão da Página 1
-    k1 = "btn_menu_ativa_1" if st.session_state.pagina == "Ato 1: Panorama Geral" else "btn_menu_1"
-    if st.button("Ato 1: Panorama Geral", key=k1):
-        st.session_state.pagina = "Ato 1: Panorama Geral"
+    k1 = "btn_menu_ativa_1" if st.session_state.pagina == "Panorama" else "btn_menu_1"
+    if st.button("Panorama", key=k1):
+        st.session_state.pagina = "Panorama"
         st.rerun()
 
     # Botão da Página 2
-    k2 = "btn_menu_ativa_2" if st.session_state.pagina == "Ato 2: Investigação e Hotspots" else "btn_menu_2"
-    if st.button("Ato 2: Investigação e Hotspots", key=k2):
-        st.session_state.pagina = "Ato 2: Investigação e Hotspots"
+    k2 = "btn_menu_ativa_2" if st.session_state.pagina == "Investigação" else "btn_menu_2"
+    if st.button("Investigação", key=k2):
+        st.session_state.pagina = "Investigação"
         st.rerun()
 
     # Botão da Página 3
-    k3 = "btn_menu_ativa_3" if st.session_state.pagina == "Ato 3: Análise Temporal e Solução" else "btn_menu_3"
-    if st.button("Ato 3: Análise Temporal e Solução", key=k3):
-        st.session_state.pagina = "Ato 3: Análise Temporal e Solução"
+    k3 = "btn_menu_ativa_3" if st.session_state.pagina == "Comprovação" else "btn_menu_3"
+    if st.button("Comprovação", key=k3):
+        st.session_state.pagina = "Comprovação"
         st.rerun()
 
     st.markdown("---")
@@ -82,16 +82,16 @@ with st.sidebar:
 pagina = st.session_state.pagina
 
 
-if pagina == "Ato 1: Panorama Geral":
+if pagina == "Panorama":
     criar_kpis_ato1(df)
     # (Chamadas dos gráficos do Ato 1 continuam aqui)
 
-elif pagina == "Ato 2: Investigação e Hotspots":
+elif pagina == "Investigação":
     criar_kpis_ato2(df)
     renderizar_infografico_dias(df)
     criar_fig_top2_causa_dia(df)
 
-elif pagina == "Ato 3: Análise Temporal e Solução":
+elif pagina == "Comprovação":
     # 1. Renderiza os cartões de KPIs
     criar_kpis_ato3(df)
     

@@ -7,7 +7,7 @@ from estilos import aplicar_estilos
 
 
 def criar_kpis_ato1(df):
-    st.title("Ato 1: O Panorama Geral")
+    st.title("O Panorama da Acidentalidade em Goiás")
     st.markdown("---")
 
     # --- CARDS DE KPI (TOPO) ---
@@ -346,8 +346,31 @@ def criar_fig_mapa(df):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def criar_kpis_ato2(df):
-    st.title("Ato 2: Investigação e Hotspots")
+    st.title("As Coincidências do Fluxo de Rotina")
     st.markdown("---")
 
     # --- CSS EXCLUSIVO DO ATO 2 ---
@@ -985,8 +1008,30 @@ def criar_fig_top2_causa_dia(df):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def criar_kpis_ato3(df):
-    st.title("Ato 3: Proposta de Intervenção e Fechamento")
+    st.title("A Comprovação Empírica da Tese Pendular")
     st.markdown("---")
 
     # CSS do Ato 3 para alinhar o espaçamento
