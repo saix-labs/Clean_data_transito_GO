@@ -23,10 +23,20 @@ def aplicar_estilos():
             background-color: #1c2541 !important;
         }
         
-        /* Forçar a cor branca em todos os textos da barra lateral */
-        section[data-testid="stSidebar"] * {
+                /* Ajuste: Cor branca para textos e rótulos comuns da barra lateral */
+        section[data-testid="stSidebar"] p, 
+        section[data-testid="stSidebar"] span, 
+        section[data-testid="stSidebar"] label {
             color: #ffffff !important;
         }
+
+        /* Restaura TODOS os botões da barra lateral para o padrão nativo do Streamlit */
+        section[data-testid="stSidebar"] button[key^="btn_menu_"] {
+            width: 100% !important;
+            margin-bottom: 12px !important;
+            color: #ffffff !important;
+        }
+
         
         /* Ajuste de cor do título e divisores */
         h1, h2, h3 {

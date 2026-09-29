@@ -2,6 +2,7 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 import plotly.graph_objects as go
+from estilos import aplicar_estilos
 
 
 
@@ -744,8 +745,8 @@ def renderizar_infografico_dias(df):
             gap: 0.25rem !important;
         }
 
-        /* Ajuste do botão nativo para virar o próprio card compacto */
-        div.stButton > button {
+                /* Ajuste do botão nativo para virar o próprio card compacto - ALVO ESTRITO DO INFOGRÁFICO */
+        div[data-testid="stVerticalBlock"]:has(.painel-neon-box) div.stButton > button {
             width: 100% !important;
             padding: 2px 8px !important;
             min-height: 28px !important;
@@ -758,10 +759,12 @@ def renderizar_infografico_dias(df):
             border-radius: 5px !important;
         }
 
-        div.stButton > button:hover {
+        /* Hover neon ajustado apenas para a área do infográfico */
+        div[data-testid="stVerticalBlock"]:has(.painel-neon-box) div.stButton > button:hover {
             border-color: #FF1744 !important;
             color: #FF1744 !important;
         }
+
 
         /* Painel Alerta Vermelho proporcional aos 7 botões */
         .painel-neon-box {
@@ -1863,6 +1866,36 @@ def renderizar_secao_mapa_hotspots_interativo(df):
             st.plotly_chart(
                 fig_mapa, use_container_width=True, key='mapa_hotspots_ato3'
             )
+            # O st.markdown DEVE ficar identado aqui dentro (24 espaços), logo abaixo do gráfico
+            st.markdown("""
+                        <div style="
+                            background: transparent;
+                            border: 1.5px solid #FFFFFF;
+                            border-radius: 8px;
+                            padding: 16px 20px;
+                            margin-top: 0px;
+                            margin-bottom: 25px;
+                            text-align: center;
+                        ">
+                            <p style="
+                                color: #FFFFFF;
+                                font-size: 15px;
+                                line-height: 1.6;
+                                margin: 0;
+                                font-weight: 400;
+                            ">
+                                A análise territorial em fatias de 5 km na janela das 16h às 20h entrega a comprovação empírica da tese:
+                                no pico do retorno para casa, a acidentalidade se afunila de forma drástica. Do total de 1.723 ocorrências
+                                registradas nesse horário em Goiás, mais de 40% — exatamente 710 acidentes — restringem-se a apenas 31 trechos específicos.
+                                A maior parte desses pontos críticos está adensada nos eixos metropolitanos (Goiânia, Aparecida e Anápolis),
+                                no Entorno do DF (Luziânia e Valparaíso) e nos grandes polos agroindustriais (Rio Verde e Catalão). Nesses locais de frenagem
+                                brusca e retenção, a Colisão Traseira domina 18 dos 31 trechos, materializando o impacto direto do tráfego pendular: o cansaço
+                                acumululado da jornada de trabalho e a pressa do regresso anulam a capacidade de reação dos condutores no trânsito lento do final da tarde.
+                            </p>
+                        </div>
+                    """, unsafe_allow_html=True)
+
+
         else:
             st.warning(
                 'Nenhum dado encontrado para os filtros selecionados ou falta de'

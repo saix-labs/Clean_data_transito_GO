@@ -49,18 +49,38 @@ df = carregar_dados()
 with st.sidebar:
     st.title("Painel de Controle")
     st.markdown("---")
+    st.write("Selecione a etapa de análise:")
+
+    # Inicializa a página padrão no estado da sessão caso não exista
+    if "pagina" not in st.session_state:
+        st.session_state.pagina = "Ato 1: Panorama Geral"
+
+    # --- CONFIGURAÇÃO INDIVIDUAL DOS BOTÕES ---
     
-    pagina = st.radio(
-        "Selecione a etapa de análise:",
-        [
-            "Ato 1: Panorama Geral",
-            "Ato 2: Investigação e Hotspots",
-            "Ato 3: Análise Temporal e Solução"
-        ]
-    )
-    
+    # Botão da Página 1
+    k1 = "btn_menu_ativa_1" if st.session_state.pagina == "Ato 1: Panorama Geral" else "btn_menu_1"
+    if st.button("Ato 1: Panorama Geral", key=k1):
+        st.session_state.pagina = "Ato 1: Panorama Geral"
+        st.rerun()
+
+    # Botão da Página 2
+    k2 = "btn_menu_ativa_2" if st.session_state.pagina == "Ato 2: Investigação e Hotspots" else "btn_menu_2"
+    if st.button("Ato 2: Investigação e Hotspots", key=k2):
+        st.session_state.pagina = "Ato 2: Investigação e Hotspots"
+        st.rerun()
+
+    # Botão da Página 3
+    k3 = "btn_menu_ativa_3" if st.session_state.pagina == "Ato 3: Análise Temporal e Solução" else "btn_menu_3"
+    if st.button("Ato 3: Análise Temporal e Solução", key=k3):
+        st.session_state.pagina = "Ato 3: Análise Temporal e Solução"
+        st.rerun()
+
     st.markdown("---")
     st.caption("Análise de Sinistros de Trânsito - PRF / GO")
+
+# Alimenta a sua variável antiga para não quebrar a lógica do restante do dashboard.py
+pagina = st.session_state.pagina
+
 
 if pagina == "Ato 1: Panorama Geral":
     criar_kpis_ato1(df)
