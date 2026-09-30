@@ -356,7 +356,7 @@ def criar_fig_mapa(df):
         hover_data={'latitude': False, 'longitude': False, 'Total de Acidentes': True},
         zoom=5.5,
         center=dict(lat=-16.6869, lon=-49.2648),
-        mapbox_style="open-street-map"
+        map_style="open-street-map"
     )
     fig.update_layout(margin=dict(t=0, b=0, l=0, r=0))
     return fig, df_municipio
@@ -1869,7 +1869,7 @@ def renderizar_secao_mapa_hotspots_interativo(df):
                         'latitude': False,
                         'longitude': False,
                     },
-                    mapbox_style='open-street-map',
+                    map_style='open-street-map',
                 )
 
                 # Mantém as bolinhas bem visíveis e com contorno nítido
@@ -1909,7 +1909,7 @@ def renderizar_secao_mapa_hotspots_interativo(df):
                         'latitude': False,
                         'longitude': False,
                     },
-                    mapbox_style='open-street-map',
+                    map_style='open-street-map',
                 )
 
                 # Mantém as bolinhas bem visíveis e com contorno nítido
