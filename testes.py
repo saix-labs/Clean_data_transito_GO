@@ -829,3 +829,14 @@ df['causa_acidente'].value_counts
 #%%
 df.info()
 # %%
+
+
+#%%
+df['classificacao_acidente'].value_counts
+# %%
+
+
+
+#%%
+df['km'].value_counts
+# %%
