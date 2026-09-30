@@ -1189,7 +1189,7 @@ def criar_kpis_ato3(df):
 
     with kpi2:
         st.metric(
-            label="Fluxo Sentido Crescente", 
+            label="Fluxo Sentido Crescente (16h - 20h)", 
             value=f"{pct_crescente:.1f}%"
         )
 
