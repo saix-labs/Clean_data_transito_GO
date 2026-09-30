@@ -345,7 +345,7 @@ def criar_fig_mapa(df):
 
     df_mapa_cidades = pd.merge(df_municipio, df_coords, on='Município')
 
-    fig = px.scatter_mapbox(
+    fig = px.scatter_map(
         df_mapa_cidades, 
         lat='latitude', 
         lon='longitude', 
@@ -1847,7 +1847,7 @@ def renderizar_secao_mapa_hotspots_interativo(df):
         if not df_mapa.empty:
             if is_pendular:
                 # Hover no Pendular inclui Sentido, Causa e Tipo
-                fig_mapa = px.scatter_mapbox(
+                fig_mapa = px.scatter_map(
                     df_mapa,
                     lat='latitude',
                     lon='longitude',
@@ -1890,7 +1890,7 @@ def renderizar_secao_mapa_hotspots_interativo(df):
                 )
             else:
                 # Hover Geral mostra apenas BR, Trecho e Total
-                fig_mapa = px.scatter_mapbox(
+                fig_mapa = px.scatter_map(
                     df_mapa,
                     lat='latitude',
                     lon='longitude',
