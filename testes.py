@@ -693,3 +693,139 @@ else:
     print("Nenhum tipo válido encontrado no período.")
 
 # %%
+
+
+
+
+# %%
+import pandas as pd
+
+# Copia a base para evitar alterações no df original
+df_valida = df.copy()
+
+# 1. Padroniza a string de horário retirando espaços nas pontas
+df_valida["horario_limpo"] = df_valida["horario"].astype(str).str.strip()
+
+# 2. Filtro cirúrgico com segundos: das 16:00:00 até exatas 20:00:00 cravadas
+df_pico = df_valida[
+    (df_valida["horario_limpo"] >= "16:00:00")
+    & (df_valida["horario_limpo"] <= "20:00:00")
+].copy()
+
+# 3. Tratamento e agrupamento por KMs (Janelas de 5 km)
+df_pico["km_num"] = pd.to_numeric(df_pico["km"], errors="coerce")
+df_pico["trecho_5km"] = (df_pico["km_num"] // 5) * 5
+
+# 4. Agrupamento principal por BR e Trecho de 5km
+agrupados_tipos = []
+
+for (br_val, trecho_val), g in df_pico.groupby(["br", "trecho_5km"]):
+    total_acidentes_trecho = len(g)
+
+    # Filtro de significância: foca apenas em trechos com 10 ou mais acidentes
+    if total_acidentes_trecho >= 10:
+        # Remove "Não Informado" e nulos locais para achar o tipo dominante real
+        tipos_limpos = (
+            g["tipo_acidente"].fillna("").astype(str).str.strip().str.lower()
+        )
+        g_validos = g[(tipos_limpos != "não informado") & (tipos_limpos != "")]
+
+        if not g_validos.empty:
+            contagem_tipos = g_validos["tipo_acidente"].value_counts()
+            tipo_dominante = contagem_tipos.index[0]
+            qtd_tipo_dominante = contagem_tipos.iloc[0]
+            pct_tipo_dominante = (
+                int((qtd_tipo_dominante / total_acidentes_trecho) * 100 * 10)
+                / 10
+            )
+        else:
+            tipo_dominante = "N/I"
+            qtd_tipo_dominante = 0
+            pct_tipo_dominante = 0.0
+
+        agrupados_tipos.append(
+            {
+                "BR": str(br_val).split(".")[0],
+                "Trecho_5km": trecho_val,
+                "Total_Acidentes": total_acidentes_trecho,
+                "Tipo_Dominante": tipo_dominante,
+                "Qtd_Tipo": qtd_tipo_dominante,
+                "Pct_Tipo": f"{pct_tipo_dominante:.1f}%",
+            }
+        )
+
+# 5. Transforma em DataFrame e ordena pelo volume de acidentes do trecho
+df_resultado_tipos = pd.DataFrame(agrupados_tipos).sort_values(
+    by="Total_Acidentes", ascending=False
+)
+
+# 6. Exibe os resultados no console
+print("=" * 95)
+print(f"📊 TIPO DOMINANTE POR TRECHO DE 5KM (10+ ACIDENTES) - 16h às 20h00")
+print("=" * 95)
+print(df_resultado_tipos.to_string(index=False))
+print("-" * 95)
+print(
+    f"Total de Trechos Analisados (com 10+ acidentes): {len(df_resultado_tipos)}"
+)
+print("=" * 95)
+
+# %%
+
+
+
+
+
+
+# %%
+import pandas as pd
+
+# 1. Cria uma cópia e padroniza a string de horário
+df_valida = df.copy()
+df_valida["horario_limpo"] = df_valida["horario"].astype(str).str.strip()
+
+# 2. Filtro cirúrgico com segundos: das 16:00:00 até exatas 20:00:00 cravadas
+df_pico = df_valida[
+    (df_valida["horario_limpo"] >= "16:00:00")
+    & (df_valida["horario_limpo"] <= "20:00:00")
+].copy()
+
+# 3. Agrupamento por BR e trecho de 5 km, contando os acidentes
+df_pico["km_num"] = pd.to_numeric(df_pico["km"], errors="coerce")
+df_pico["trecho_5km"] = (df_pico["km_num"] // 5) * 5
+
+trechos_agrupados = (
+    df_pico.groupby(["br", "trecho_5km"])
+    .size()
+    .reset_index(name="total_acidentes")
+)
+
+# 4. Isola apenas os trechos que possuem 10 ou mais acidentes (Pontos Críticos)
+df_criticos = trechos_agrupados[trechos_agrupados["total_acidentes"] >= 10]
+
+# 5. Calcula as somas para validação
+total_pontos_criticos = len(df_criticos)
+soma_acidentes_nos_criticos = df_criticos["total_acidentes"].sum()
+
+# 6. Exibe os resultados no console
+print("=" * 65)
+print("📊 VALIDAÇÃO DO AFUNILAMENTO TERRITORIAL")
+print("=" * 65)
+print(f"• Total de pontos críticos encontrados (10+ acidentes): {total_pontos_criticos}")
+print(f"• Soma exata de acidentes dentro desses {total_pontos_criticos} pontos: {soma_acidentes_nos_criticos}")
+print("=" * 65)
+
+# %%
+
+
+
+
+
+#%%
+df['causa_acidente'].value_counts
+# %%
+
+
+#%%
+df.info()
+# %%

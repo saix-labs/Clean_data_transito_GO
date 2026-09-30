@@ -41,7 +41,7 @@ def criar_kpis_ato1(df):
     br_mais_critica = f"BR-{df['br'].mode()[0]}"
 
     # Soma apenas Pista Simples + Pista Dupla
-    pct_pista_simples_dupla = (df['tipo_pista'].str.contains('Simples|Dupla', case=False, na=False).sum() / total_acidentes) * 100
+    pct_pista_dupla = (df['tipo_pista'].str.contains('Dupla', case=False, na=False).sum() / total_acidentes) * 100
     
     # Calcula Céu Claro / Sol
     pct_ceu_claro = (df['condicao_metereologica'].str.contains('Céu Claro|Sol', case=False, na=False).sum() / total_acidentes) * 100
@@ -55,7 +55,7 @@ def criar_kpis_ato1(df):
         st.metric(label="BR com Maior Volume", value=br_mais_critica)
 
     with kpi3:
-        st.metric(label="Acidentes em Pista Simples e Dupla", value=f"{pct_pista_simples_dupla:.1f}%")
+        st.metric(label="Acidentes em Pista Dupla", value=f"{pct_pista_dupla:.1f}%")
 
     with kpi4:
         st.metric(label="Acidentes a Céu Claro", value=f"{pct_ceu_claro:.1f}%")
