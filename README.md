@@ -43,7 +43,7 @@ Este projeto foi concebido e estruturado com base no conceito de **Desenvolvimen
 ## 🚀 Como Visualizar a Aplicação
 Para acessar a solução analítica interativa publicada na nuvem e realizar as suas próprias consultas, basta clicar no link abaixo:
 
-🔗 [Acessar Dashboard no Streamlit Cloud](Substitua este texto pelo link que você gerar no Streamlit)
+🔗 [Acessar Dashboard no Streamlit Cloud](https://cleandatatransitogogit-9c9puzmecxfsnbd89q7zh9.streamlit.app/)
 
 ---
 
