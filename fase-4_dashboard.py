@@ -39,9 +39,10 @@ aplicar_estilos()
 # 3. Carregamento dos dados com Cache (Otimizado)
 @st.cache_data
 def carregar_dados():
-    caminho = r"C:\Users\ezequiel\OneDrive\Desktop\PI Trânsito GO\acidentes-GO-2024_2025_limpo.csv"
+    caminho = "acidentes-GO-2024_2025_limpo.csv"  # Caminho relativo para a nuvem encontrar
     df = pd.read_csv(caminho)
     return df
+
 
 df = carregar_dados()
 
